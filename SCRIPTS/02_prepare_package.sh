@@ -21,7 +21,8 @@ wget -P include/ https://github.com/immortalwrt/immortalwrt/raw/openwrt-21.02/in
 sed -i '/unshift/d' scripts/download.pl
 sed -i '/mirror02/d' scripts/download.pl
 echo "net.netfilter.nf_conntrack_helper = 1" >> ./package/kernel/linux/files/sysctl-nf-conntrack.conf
-
+#修改默认ip
+sed -i 's/192.168.1.1/192.168.2.1/' package/base-files/files/bin/config_generate
 # BBRv2
 patch -p1 < ../PATCH/BBRv2/openwrt-kmod-bbr2.patch
 cp -f ../PATCH/BBRv2/693-Add_BBRv2_congestion_control_for_Linux_TCP.patch ./target/linux/generic/hack-5.4/693-Add_BBRv2_congestion_control_for_Linux_TCP.patch
