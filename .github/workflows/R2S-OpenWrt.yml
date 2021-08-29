@@ -153,4 +153,4 @@ jobs:
         tag: ${{env.strDate}}
         file_glob: true
         overwrite: true
-        release_name: $(date +%Y-%m-%d)-openwrt-21.02更新
+        release_name: ${{env.strDate}}-openwrt-21.02更新
