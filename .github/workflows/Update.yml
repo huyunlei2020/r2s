@@ -1,8 +1,8 @@
-name: Update openwrt
+name: Update
 
 env:
-  REPO_URL: https://github.com/openwrt/openwrt
-  REPO_BRANCH: openwrt-21.02
+  REPO_URL: https://github.com/QiuSimons/YAOF
+  REPO_BRANCH: master
 
 on:
   workflow_dispatch:
