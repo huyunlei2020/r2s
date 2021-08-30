@@ -1,49 +1,49 @@
 diff --git a/Documentation/vm/uksm.txt b/Documentation/vm/uksm.txt
-新文件模式 100644
-索引 000000000000..be19a3127001
---- /开发/空
+new file mode 100644
+index 000000000000..be19a3127001
+--- /dev/null
 +++ b/Documentation/vm/uksm.txt
 @@ -0,0 +1,61 @@
-+超内核同页合并功能
-+ ----------------------------------------------
-+ /*
-+ * 超 KSM。版权所有 (C) 2011-2012 耐夏
++The Ultra Kernel Samepage Merging feature
++----------------------------------------------
++/*
++ * Ultra KSM. Copyright (C) 2011-2012 Nai Xia
 + *
-+ * 这是对 KSM 的改进。一些基本的数据结构和例程
-+ * 是从 ksm.c 借来的。
++ * This is an improvement upon KSM. Some basic data structures and routines
++ * are borrowed from ksm.c .
 + *
-+ * 其新功能：
-+ * 1. 全系统扫描：
-+ * 它会自动扫描所有用户进程的匿名 VMA。内核用户
-+ * 不再需要向 KSM 提交内存区域的交互。
++ * Its new features:
++ * 1. Full system scan:
++ *      It automatically scans all user processes' anonymous VMAs. Kernel-user
++ *      interaction to submit a memory area to KSM is no longer needed.
 + *
-+ * 2.丰富的区域检测：
-+ * 自动检测含有大量重复的丰富区域
-+ * 基于页面。丰富的区域被赋予全扫描速度。贫困地区是
-+ * 以合理的速度采样，CPU 消耗非常低。
++ * 2. Rich area detection:
++ *      It automatically detects rich areas containing abundant duplicated
++ *      pages based. Rich areas are given a full scan speed. Poor areas are
++ *      sampled at a reasonable speed with very low CPU consumption.
 + *
-+ * 3. 超每页扫描速度提升：
-+ * 提出了一种新的哈希算法。结果，在一台机器上
-+ * Core(TM)2 Quad Q9300 CPU in 32-bit mode and 800MHZ DDR2 main memory, it
-+ * 可以扫描不包含重复页面的内存区域的速度
-+ * 627MB/sec ~ 2445MB/sec 并且可以以
-+ * 477MB/秒 ~ 923MB/秒。
++ * 3. Ultra Per-page scan speed improvement:
++ *      A new hash algorithm is proposed. As a result, on a machine with
++ *      Core(TM)2 Quad Q9300 CPU in 32-bit mode and 800MHZ DDR2 main memory, it
++ *      can scan memory areas that does not contain duplicated pages at speed of
++ *      627MB/sec ~ 2445MB/sec and can merge duplicated areas at speed of
++ *      477MB/sec ~ 923MB/sec.
 + *
-+ * 4. 避免震荡区域：
-+ * 抖动区域（Ksm 分页频繁的 VMA）可以是
-+ * 过滤掉。我的基准测试表明它比 KSM 的每页效率更高
-+ * 基于哈希值的易失性页面检测。
++ * 4. Thrashing area avoidance:
++ *      Thrashing area(an VMA that has frequent Ksm page break-out) can be
++ *      filtered out. My benchmark shows it's more efficient than KSM's per-page
++ *      hash value based volatile page detection.
 + *
 + *
-+ * 5. KSM 上的其他更改：
-+ * * 它有一个专用于 4 字节对齐页面的完全 x86 优化的 memcmp
-+ * 比较。它比 x86 上的默认 C 版本快得多。
-+ * * rmap_item 现在有一个 struct *page 成员来松散地缓存一个
-+ * 地址-->页面映射，减少太多时间成本
-+ * follow_page()。
-+ * * VMA 创建/退出程序被挂钩以让 Ultra KSM 知道。
-+ * * try_to_merge_two_pages() 现在可以在失败时恢复 pte。没有休息_
-+ * 这种情况下需要 ksm。
++ * 5. Misc changes upon KSM:
++ *      * It has a fully x86-opitmized memcmp dedicated for 4-byte-aligned page
++ *        comparison. It's much faster than default C version on x86.
++ *      * rmap_item now has an struct *page member to loosely cache a
++ *        address-->page mapping, which reduces too much time-costly
++ *        follow_page().
++ *      * The VMA creation/exit procedures are hooked to let the Ultra KSM know.
++ *      * try_to_merge_two_pages() now can revert a pte if it fails. No break_
++ *        ksm is needed for this case.
 + *
 + * 6. Full Zero Page consideration(contributed by Figo Zhang)
 + *    Now uksmd consider full zero pages as special pages and merge them to an
@@ -60,150 +60,150 @@ diff --git a/Documentation/vm/uksm.txt b/Documentation/vm/uksm.txt
 +2012-07-10 UKSM 0.1.2-beta3
 +2012-07-26 UKSM 0.1.2 Fine grained speed control, more scan optimization.
 +2012-10-13 UKSM 0.1.2.1 Bug fixes.
-+ 2012-12-31 UKSM 0.1.2.2 小错误修复。
-+ 2014-07-02 UKSM 0.1.2.3 修复了“__this_cpu_read() in preemptible bug”。
-+ 2015-04-22 UKSM 0.1.2.4 修复了有时会触发匿名警告的竞争条件。
-+ 2016-09-10 UKSM 0.1.2.5 修复了重复数据删除率计算中的错误。
-+ 2017-02-26 UKSM 0.1.2.6 修复了hugetlbpage 处理中的一个错误和一个页面迁移的竞争错误。
-diff --git a/fs/exec.cb/fs/exec.c
-索引 555e93c7dec8..7e1cfd568e6c 100644
++2012-12-31 UKSM 0.1.2.2 Minor bug fixes.
++2014-07-02 UKSM 0.1.2.3 Fix a " __this_cpu_read() in preemptible bug".
++2015-04-22 UKSM 0.1.2.4 Fix a race condition that can sometimes trigger anonying warnings.
++2016-09-10 UKSM 0.1.2.5 Fix a bug in dedup ratio calculation.
++2017-02-26 UKSM 0.1.2.6 Fix a bug in hugetlbpage handling and a race bug with page migration.
+diff --git a/fs/exec.c b/fs/exec.c
+index 555e93c7dec8..7e1cfd568e6c 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
 @@ -63,6 +63,7 @@
  #include <linux/oom.h>
  #include <linux/compat.h>
  #include <linux/vmalloc.h>
-+ #include <linux/ksm.h>
++#include <linux/ksm.h>
  
  #include <linux/uaccess.h>
  #include <asm/mmu_context.h>
-diff --git a/fs/proc/meminfo.cb/fs/proc/meminfo.c
-索引 8c1f1bb1a5ce..62e28cf10bbf 100644
+diff --git a/fs/proc/meminfo.c b/fs/proc/meminfo.c
+index 8c1f1bb1a5ce..62e28cf10bbf 100644
 --- a/fs/proc/meminfo.c
 +++ b/fs/proc/meminfo.c
 @@ -105,7 +105,10 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
  		   global_zone_page_state(NR_KERNEL_STACK_KB));
- 	show_val_kb(m, "PageTables: ",
+ 	show_val_kb(m, "PageTables:     ",
  		    global_zone_page_state(NR_PAGETABLE));
-——
-+ #ifdef CONFIG_UKSM
-+ 	show_val_kb(m, "KsmZeroPages: ",
-+ 		    global_zone_page_state(NR_UKSM_ZERO_PAGES));
-+ #endif
- 	show_val_kb(m, "NFS_Unstable: ",
+-
++#ifdef CONFIG_UKSM
++	show_val_kb(m, "KsmZeroPages:     ",
++		    global_zone_page_state(NR_UKSM_ZERO_PAGES));
++#endif
+ 	show_val_kb(m, "NFS_Unstable:   ",
  		    global_node_page_state(NR_UNSTABLE_NFS));
- 	show_val_kb(m, "弹跳：",
-diff --git a/include/asm-generic/pgtable.hb/include/asm-generic/pgtable.h
-索引 818691846c90..b2169f37c696 100644
+ 	show_val_kb(m, "Bounce:         ",
+diff --git a/include/asm-generic/pgtable.h b/include/asm-generic/pgtable.h
+index 818691846c90..b2169f37c696 100644
 --- a/include/asm-generic/pgtable.h
 +++ b/include/asm-generic/pgtable.h
 @@ -855,12 +855,25 @@ extern void untrack_pfn(struct vm_area_struct *vma, unsigned long pfn,
- 外部无效 untrack_pfn_moved(struct vm_area_struct *vma);
- ＃万一
+ extern void untrack_pfn_moved(struct vm_area_struct *vma);
+ #endif
  
-+ #ifdef CONFIG_UKSM
-+静态内联 int is_uksm_zero_pfn(unsigned long pfn)
-+ {
-+ 	extern unsigned long uksm_zero_pfn;
-+	返回 pfn == uksm_zero_pfn;
-+ }
-+ #else
-+静态内联 int is_uksm_zero_pfn(unsigned long pfn)
-+ {
-+	返回 0；
-+ }
-+ #endif
++#ifdef CONFIG_UKSM
++static inline int is_uksm_zero_pfn(unsigned long pfn)
++{
++	extern unsigned long uksm_zero_pfn;
++	return pfn == uksm_zero_pfn;
++}
++#else
++static inline int is_uksm_zero_pfn(unsigned long pfn)
++{
++	return 0;
++}
++#endif
 +
  #ifdef __HAVE_COLOR_ZERO_PAGE
- 静态内联 int is_zero_pfn(unsigned long pfn)
+ static inline int is_zero_pfn(unsigned long pfn)
  {
  	extern unsigned long zero_pfn;
  	unsigned long offset_from_zero_pfn = pfn - zero_pfn;
--	返回 offset_from_zero_pfn <= (zero_page_mask >> PAGE_SHIFT);
-+	返回 offset_from_zero_pfn <= (zero_page_mask >> PAGE_SHIFT) || is_uksm_zero_pfn(pfn);
+-	return offset_from_zero_pfn <= (zero_page_mask >> PAGE_SHIFT);
++	return offset_from_zero_pfn <= (zero_page_mask >> PAGE_SHIFT) || is_uksm_zero_pfn(pfn);
  }
  
- #define my_zero_pfn(addr) page_to_pfn(ZERO_PAGE(addr))
+ #define my_zero_pfn(addr)	page_to_pfn(ZERO_PAGE(addr))
 @@ -869,7 +882,7 @@ static inline int is_zero_pfn(unsigned long pfn)
- 静态内联 int is_zero_pfn(unsigned long pfn)
+ static inline int is_zero_pfn(unsigned long pfn)
  {
  	extern unsigned long zero_pfn;
--	返回 pfn == zero_pfn;
-+	返回 (pfn == zero_pfn) || (is_uksm_zero_pfn(pfn));
+-	return pfn == zero_pfn;
++	return (pfn == zero_pfn) || (is_uksm_zero_pfn(pfn));
  }
  
- 静态内联 unsigned long my_zero_pfn(unsigned long addr)
-差异 --git a/include/linux/ksm.hb/include/linux/ksm.h
-索引 e48b1e453ff5..095d59310ce0 100644
+ static inline unsigned long my_zero_pfn(unsigned long addr)
+diff --git a/include/linux/ksm.h b/include/linux/ksm.h
+index e48b1e453ff5..095d59310ce0 100644
 --- a/include/linux/ksm.h
 +++ b/include/linux/ksm.h
 @@ -1,4 +1,4 @@
-- /* SPDX-License-Identifier: GPL-2.0 */
-+ /* SPDX-License-Identifier: GPL-3.0 */
+-/* SPDX-License-Identifier: GPL-2.0 */
++/* SPDX-License-Identifier: GPL-3.0 */
  #ifndef __LINUX_KSM_H
  #define __LINUX_KSM_H
  /*
 @@ -21,20 +21,16 @@ struct mem_cgroup;
  #ifdef CONFIG_KSM
  int ksm_madvise(struct vm_area_struct *vma, unsigned long start,
- 		无符号长尾，整数建议，无符号长 *vm_flags)；
-- int __ksm_enter(struct mm_struct *mm);
--无效 __ksm_exit(struct mm_struct *mm);
+ 		unsigned long end, int advice, unsigned long *vm_flags);
+-int __ksm_enter(struct mm_struct *mm);
+-void __ksm_exit(struct mm_struct *mm);
  
--静态内联 int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
-+静态内联结构 stable_node *page_stable_node(struct page *page)
+-static inline int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
++static inline struct stable_node *page_stable_node(struct page *page)
  {
--	如果 (test_bit(MMF_VM_MERGEABLE, &oldmm->flags))
--		返回 __ksm_enter(mm);
--	返回 0；
-+	返回 PageKsm(page) ？page_rmapping(page) : NULL;
+-	if (test_bit(MMF_VM_MERGEABLE, &oldmm->flags))
+-		return __ksm_enter(mm);
+-	return 0;
++	return PageKsm(page) ? page_rmapping(page) : NULL;
  }
  
--静态内联 void ksm_exit(struct mm_struct *mm)
-+静态内联 void set_page_stable_node(struct page *page,
-+ 					struct stable_node *stable_node)
+-static inline void ksm_exit(struct mm_struct *mm)
++static inline void set_page_stable_node(struct page *page,
++					struct stable_node *stable_node)
  {
--	如果 (test_bit(MMF_VM_MERGEABLE, &mm->flags))
-- 		__ksm_exit(mm);
-+ 	page->mapping = (void *)((unsigned long)stable_node | PAGE_MAPPING_KSM);
+-	if (test_bit(MMF_VM_MERGEABLE, &mm->flags))
+-		__ksm_exit(mm);
++	page->mapping = (void *)((unsigned long)stable_node | PAGE_MAPPING_KSM);
  }
  
  /*
 @@ -56,6 +52,33 @@ void ksm_migrate_page(struct page *newpage, struct page *oldpage);
- 布尔重用_ksm_page(struct page *page,
- 			struct vm_area_struct *vma，无符号长地址）；
+ bool reuse_ksm_page(struct page *page,
+ 			struct vm_area_struct *vma, unsigned long address);
  
-+ #ifdef CONFIG_KSM_LEGACY
-+ int __ksm_enter(struct mm_struct *mm);
-+ void __ksm_exit(struct mm_struct *mm);
-+静态内联 int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
-+ {
-+ 	if (test_bit(MMF_VM_MERGEABLE, &oldmm->flags))
-+		返回 __ksm_enter(mm);
-+	返回 0；
-+ }
++#ifdef CONFIG_KSM_LEGACY
++int __ksm_enter(struct mm_struct *mm);
++void __ksm_exit(struct mm_struct *mm);
++static inline int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
++{
++	if (test_bit(MMF_VM_MERGEABLE, &oldmm->flags))
++		return __ksm_enter(mm);
++	return 0;
++}
 +
-+静态内联无效 ksm_exit(struct mm_struct *mm)
-+ {
-+ 	if (test_bit(MMF_VM_MERGEABLE, &mm->flags))
-+ 		__ksm_exit(mm);
-+ }
++static inline void ksm_exit(struct mm_struct *mm)
++{
++	if (test_bit(MMF_VM_MERGEABLE, &mm->flags))
++		__ksm_exit(mm);
++}
 +
-+ #elif 定义（CONFIG_UKSM）
-+静态内联 int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
-+ {
-+	返回 0；
-+ }
++#elif defined(CONFIG_UKSM)
++static inline int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
++{
++	return 0;
++}
 +
-+静态内联无效 ksm_exit(struct mm_struct *mm)
-+ {
-+ }
-+ #endif /* !CONFIG_UKSM */
++static inline void ksm_exit(struct mm_struct *mm)
++{
++}
++#endif /* !CONFIG_UKSM */
 +
- #else /* !CONFIG_KSM */
+ #else  /* !CONFIG_KSM */
  
- 静态内联 int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
-@@ -96,4 +119,6 @@静态内联布尔重用_ksm_page(struct page *page,
+ static inline int ksm_fork(struct mm_struct *mm, struct mm_struct *oldmm)
+@@ -96,4 +119,6 @@ static inline bool reuse_ksm_page(struct page *page,
  #endif /* CONFIG_MMU */
  #endif /* !CONFIG_KSM */
  
@@ -272,92 +272,92 @@ index 000000000000..d71edba6b63f
 +/* A simple radix tree implementation */
 +struct sradix_tree_root {
 +	unsigned int            height;
-+ 	struct sradix_tree_node *rnode;
++	struct sradix_tree_node *rnode;
 +
-+ 	/* 在其子级别中发现可用空商店的地方 */
-+ 	struct sradix_tree_node *enter_node;
-+	无符号整数移位；
-+ 	unsigned int stores_size;
-+ 	unsigned int 掩码；
-+	无符号长分钟；/* 第一个孔索引 */
-+	无符号长整数；
-+ 	//unsigned long *height_to_maxindex;
++	/* Where found to have available empty stores in its sublevels */
++	struct sradix_tree_node *enter_node;
++	unsigned int shift;
++	unsigned int stores_size;
++	unsigned int mask;
++	unsigned long min;	/* The first hole index */
++	unsigned long num;
++	//unsigned long *height_to_maxindex;
 +
-+ 	/* 节点如何分配和释放。*/
-+ 	struct sradix_tree_node *(*alloc)(void);
-+ 	void (*free)(struct sradix_tree_node *node);
++	/* How the node is allocated and freed. */
++	struct sradix_tree_node *(*alloc)(void);
++	void (*free)(struct sradix_tree_node *node);
 +
-+ 	/* 添加和删除新节点时 */
-+ 	void (*extend)(struct sradix_tree_node *parent, struct sradix_tree_node *child);
-+ 	void (*assign)(struct sradix_tree_node *node, unsigned int index, void *item);
-+ 	void (*rm)(struct sradix_tree_node *node, unsigned int offset);
-+ };
++	/* When a new node is added and removed */
++	void (*extend)(struct sradix_tree_node *parent, struct sradix_tree_node *child);
++	void (*assign)(struct sradix_tree_node *node, unsigned int index, void *item);
++	void (*rm)(struct sradix_tree_node *node, unsigned int offset);
++};
 +
-+ struct sradix_tree_path {
-+ 	struct sradix_tree_node *node;
-+	整数偏移量；
-+ };
++struct sradix_tree_path {
++	struct sradix_tree_node *node;
++	int offset;
++};
 +
-+静态内联
-+ void init_sradix_tree_root(struct sradix_tree_root *root, unsigned long shift)
-+ {
-+	根->高度 = 0;
-+	根->rnode = NULL;
-+	根-> 移位 = 移位；
-+ 	root->stores_size = 1UL << shift;
-+ 	root->mask = root->stores_size - 1;
-+ }
++static inline
++void init_sradix_tree_root(struct sradix_tree_root *root, unsigned long shift)
++{
++	root->height = 0;
++	root->rnode = NULL;
++	root->shift = shift;
++	root->stores_size = 1UL << shift;
++	root->mask = root->stores_size - 1;
++}
 +
 +
-+ extern void *sradix_tree_next(struct sradix_tree_root *root,
-+ 		       struct sradix_tree_node *node，无符号长索引，
-+ 		       int (*iter)(void *, unsigned long));
++extern void *sradix_tree_next(struct sradix_tree_root *root,
++		       struct sradix_tree_node *node, unsigned long index,
++		       int (*iter)(void *, unsigned long));
 +
-+ extern int sradix_tree_enter(struct sradix_tree_root *root, void **item, int num);
++extern int sradix_tree_enter(struct sradix_tree_root *root, void **item, int num);
 +
-+ extern void sradix_tree_delete_from_leaf(struct sradix_tree_root *root,
-+ 			struct sradix_tree_node *node, unsigned long index);
++extern void sradix_tree_delete_from_leaf(struct sradix_tree_root *root,
++			struct sradix_tree_node *node, unsigned long index);
 +
-+ extern void *sradix_tree_lookup(struct sradix_tree_root *root, unsigned long index);
++extern void *sradix_tree_lookup(struct sradix_tree_root *root, unsigned long index);
 +
-+ #endif /* _LINUX_SRADIX_TREE_H */
-差异 --git a/include/linux/uksm.hb/include/linux/uksm.h
-新文件模式 100644
-索引 000000000000..bb8651f534f2
---- /开发/空
++#endif /* _LINUX_SRADIX_TREE_H */
+diff --git a/include/linux/uksm.h b/include/linux/uksm.h
+new file mode 100644
+index 000000000000..bb8651f534f2
+--- /dev/null
 +++ b/include/linux/uksm.h
 @@ -0,0 +1,149 @@
-+ #ifndef __LINUX_UKSM_H
-+ #define __LINUX_UKSM_H
-+ /*
-+ * 内存合并支持。
++#ifndef __LINUX_UKSM_H
++#define __LINUX_UKSM_H
++/*
++ * Memory merging support.
 + *
-+ * 此代码可以动态共享不同页面中的相同页面
-+ * 内存区域，即使它们没有被 fork() 共享。
++ * This code enables dynamic sharing of identical pages found in different
++ * memory areas, even if they are not shared by fork().
 + */
 +
-+ /* 如果 !CONFIG_UKSM 这个文件根本不应该被编译。*/
-+ #ifdef CONFIG_UKSM
++/* if !CONFIG_UKSM this file should not be compiled at all. */
++#ifdef CONFIG_UKSM
 +
-+ #include <linux/bitops.h>
-+ #include <linux/mm.h>
-+ #include <linux/pagemap.h>
-+ #include <linux/rmap.h>
-+ #include <linux/sched.h>
++#include <linux/bitops.h>
++#include <linux/mm.h>
++#include <linux/pagemap.h>
++#include <linux/rmap.h>
++#include <linux/sched.h>
 +
-+ extern unsigned long zero_pfn __read_mostly;
-+ extern unsigned long uksm_zero_pfn __read_mostly;
-+外部结构页 *empty_uksm_zero_page;
++extern unsigned long zero_pfn __read_mostly;
++extern unsigned long uksm_zero_pfn __read_mostly;
++extern struct page *empty_uksm_zero_page;
 +
-+ /* 必须在链接到 mm 之前完成 */
-+外部无效 uksm_vma_add_new(struct vm_area_struct *vma);
-+ extern void uksm_remove_vma(struct vm_area_struct *vma);
++/* must be done before linked to mm */
++extern void uksm_vma_add_new(struct vm_area_struct *vma);
++extern void uksm_remove_vma(struct vm_area_struct *vma);
 +
-+ #define UKSM_SLOT_NEED_SORT (1 << 0)
-+ #define UKSM_SLOT_NEED_RERAND (1 << 1)
-+ #define UKSM_SLOT_SCANNED (1 << 2) /* 本轮扫描 */
-+ #define UKSM_SLOT_FUL_SCANNED (1 << 3)
-+ #define UKSM_SLOT_IN_UKSM (1 << 4)
++#define UKSM_SLOT_NEED_SORT	(1 << 0)
++#define UKSM_SLOT_NEED_RERAND	(1 << 1)
++#define UKSM_SLOT_SCANNED	(1 << 2) /* It's scanned in this round */
++#define UKSM_SLOT_FUL_SCANNED	(1 << 3)
++#define UKSM_SLOT_IN_UKSM	(1 << 4)
 +
 +struct vma_slot {
 +	struct sradix_tree_node *snode;
@@ -377,121 +377,121 @@ index 000000000000..d71edba6b63f
 +	struct vm_area_struct *vma;
 +	struct mm_struct *mm;
 +	unsigned long ctime_j;
-+	无符号长页；
-+	无符号长标志；
-+ 	unsigned long pages_cowed; /* 页面吓坏了这一轮 */
-+ 	unsigned long pages_merged; /* 本轮合并页面 */
-+ 	unsigned long pages_bemerged;
++	unsigned long pages;
++	unsigned long flags;
++	unsigned long pages_cowed; /* pages cowed this round */
++	unsigned long pages_merged; /* pages merged this round */
++	unsigned long pages_bemerged;
 +
-+ 	/* 当它在此 eval 轮中合并页面时 */
-+ 	struct list_head dedup_list;
-+ };
++	/* when it has page merged in this eval round */
++	struct list_head dedup_list;
++};
 +
-+静态内联无效 uksm_unmap_zero_page(pte_t pte)
-+ {
-+	如果 (pte_pfn(pte) == uksm_zero_pfn)
-+ 		__dec_zone_page_state(empty_uksm_zero_page, NR_UKSM_ZERO_PAGES);
-+ }
++static inline void uksm_unmap_zero_page(pte_t pte)
++{
++	if (pte_pfn(pte) == uksm_zero_pfn)
++		__dec_zone_page_state(empty_uksm_zero_page, NR_UKSM_ZERO_PAGES);
++}
 +
-+静态内联无效 uksm_map_zero_page(pte_t pte)
-+ {
-+	如果 (pte_pfn(pte) == uksm_zero_pfn)
-+ 		__inc_zone_page_state(empty_uksm_zero_page, NR_UKSM_ZERO_PAGES);
-+ }
++static inline void uksm_map_zero_page(pte_t pte)
++{
++	if (pte_pfn(pte) == uksm_zero_pfn)
++		__inc_zone_page_state(empty_uksm_zero_page, NR_UKSM_ZERO_PAGES);
++}
 +
-+静态内联无效 uksm_cow_page(struct vm_area_struct *vma, struct page *page)
-+ {
-+ 	if (vma->uksm_vma_slot && PageKsm(page))
-+ 		vma->uksm_vma_slot->pages_cowed++；
-+ }
++static inline void uksm_cow_page(struct vm_area_struct *vma, struct page *page)
++{
++	if (vma->uksm_vma_slot && PageKsm(page))
++		vma->uksm_vma_slot->pages_cowed++;
++}
 +
-+静态内联无效 uksm_cow_pte(struct vm_area_struct *vma, pte_t pte)
-+ {
-+ 	if (vma->uksm_vma_slot && pte_pfn(pte) == uksm_zero_pfn)
-+ 		vma->uksm_vma_slot->pages_cowed++；
-+ }
++static inline void uksm_cow_pte(struct vm_area_struct *vma, pte_t pte)
++{
++	if (vma->uksm_vma_slot && pte_pfn(pte) == uksm_zero_pfn)
++		vma->uksm_vma_slot->pages_cowed++;
++}
 +
-+静态内联 int uksm_flags_can_scan(unsigned long vm_flags)
-+ {
-+ #ifdef VM_SAO
-+ 		if (vm_flags & VM_SAO)
-+			返回 0；
-+ #endif
++static inline int uksm_flags_can_scan(unsigned long vm_flags)
++{
++#ifdef VM_SAO
++		if (vm_flags & VM_SAO)
++			return 0;
++#endif
 +
-+	返回 !(vm_flags & (VM_PFNMAP | VM_IO | VM_DONTEXPAND |
-+ 			     VM_HUGETLB | VM_MIXEDMAP | 虚拟机共享
-+ 			     | VM_MAYSHARE | VM_GROWSUP | VM_GROWSDOWN));
-+ }
++	return !(vm_flags & (VM_PFNMAP | VM_IO  | VM_DONTEXPAND |
++			     VM_HUGETLB | VM_MIXEDMAP | VM_SHARED
++			     | VM_MAYSHARE | VM_GROWSUP | VM_GROWSDOWN));
++}
 +
-+静态内联 void uksm_vm_flags_mod(unsigned long *vm_flags_p)
-+ {
-+ 	if (uksm_flags_can_scan(*vm_flags_p))
-+ 		*vm_flags_p |= VM_MERGEABLE;
-+ }
++static inline void uksm_vm_flags_mod(unsigned long *vm_flags_p)
++{
++	if (uksm_flags_can_scan(*vm_flags_p))
++		*vm_flags_p |= VM_MERGEABLE;
++}
 +
-+ /*
-+ * 只是一个 BUG_ON 的包装器，用于 ksm_zeropage 不能是。TODO：它会
-+ * 当 uksm 零页补丁足够稳定时被删除。
++/*
++ * Just a wrapper for BUG_ON for where ksm_zeropage must not be. TODO: it will
++ * be removed when uksm zero page patch is stable enough.
 + */
-+静态内联无效 uksm_bugon_zeropage(pte_t pte)
-+ {
-+ 	BUG_ON(pte_pfn(pte) == uksm_zero_pfn);
-+ }
-+ #else
-+静态内联无效 uksm_vma_add_new(struct vm_area_struct *vma)
-+ {
-+ }
++static inline void uksm_bugon_zeropage(pte_t pte)
++{
++	BUG_ON(pte_pfn(pte) == uksm_zero_pfn);
++}
++#else
++static inline void uksm_vma_add_new(struct vm_area_struct *vma)
++{
++}
 +
-+静态内联无效 uksm_remove_vma(struct vm_area_struct *vma)
-+ {
-+ }
++static inline void uksm_remove_vma(struct vm_area_struct *vma)
++{
++}
 +
-+静态内联无效 uksm_unmap_zero_page(pte_t pte)
-+ {
-+ }
++static inline void uksm_unmap_zero_page(pte_t pte)
++{
++}
 +
-+静态内联无效 uksm_map_zero_page(pte_t pte)
-+ {
-+ }
++static inline void uksm_map_zero_page(pte_t pte)
++{
++}
 +
-+静态内联无效 uksm_cow_page(struct vm_area_struct *vma, struct page *page)
-+ {
-+ }
++static inline void uksm_cow_page(struct vm_area_struct *vma, struct page *page)
++{
++}
 +
-+静态内联无效 uksm_cow_pte(struct vm_area_struct *vma, pte_t pte)
-+ {
-+ }
++static inline void uksm_cow_pte(struct vm_area_struct *vma, pte_t pte)
++{
++}
 +
-+静态内联 int uksm_flags_can_scan(unsigned long vm_flags)
-+ {
-+	返回 0；
-+ }
++static inline int uksm_flags_can_scan(unsigned long vm_flags)
++{
++	return 0;
++}
 +
-+静态内联 void uksm_vm_flags_mod(unsigned long *vm_flags_p)
-+ {
-+ }
++static inline void uksm_vm_flags_mod(unsigned long *vm_flags_p)
++{
++}
 +
-+静态内联无效 uksm_bugon_zeropage(pte_t pte)
-+ {
-+ }
-+ #endif /* !CONFIG_UKSM */
-+ #endif /* __LINUX_UKSM_H */
-diff --git a/kernel/fork.cb/kernel/fork.c
-索引 13b38794efb5..acb562745f1c 100644
---- a/内核/fork.c
-+++ b/内核/fork.c
++static inline void uksm_bugon_zeropage(pte_t pte)
++{
++}
++#endif /* !CONFIG_UKSM */
++#endif /* __LINUX_UKSM_H */
+diff --git a/kernel/fork.c b/kernel/fork.c
+index 13b38794efb5..acb562745f1c 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
 @@ -595,7 +595,7 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
  		__vma_link_rb(mm, tmp, rb_link, rb_parent);
  		rb_link = &tmp->vm_rb.rb_right;
  		rb_parent = &tmp->vm_rb;
-——
-+ 		uksm_vma_add_new(tmp);
- 		毫米->地图计数++；
- 		如果 (!(tmp->vm_flags & VM_WIPEONFORK))
+-
++		uksm_vma_add_new(tmp);
+ 		mm->map_count++;
+ 		if (!(tmp->vm_flags & VM_WIPEONFORK))
  			retval = copy_page_range(mm, oldmm, mpnt);
 diff --git a/lib/Makefile b/lib/Makefile
-索引 c5892807e06f..4b0d37da9fa0 100644
---- 一个/lib/Makefile
+index c5892807e06f..4b0d37da9fa0 100644
+--- a/lib/Makefile
 +++ b/lib/Makefile
 @@ -25,7 +25,7 @@ CFLAGS_string.o := $(call cc-option, -fno-stack-protector)
  endif
@@ -621,153 +621,153 @@ index 000000000000..ab21e6309b93
 +
 +	while (node->height > 1) {
 +go_down:
-+		节点 = 项目；
-+ 		for (offset = 0; offset < root->stores_size; offset++) {
-+ 			item = node->stores[offset];
-+ 			if (item && (!iter || iter(item, node->height)))
-+				休息；
-+ 		}
++		node = item;
++		for (offset = 0; offset < root->stores_size; offset++) {
++			item = node->stores[offset];
++			if (item && (!iter || iter(item, node->height)))
++				break;
++		}
 +
-+ 		if (不太可能(offset >= root->stores_size))
-+			返回空；
-+ 	}
++		if (unlikely(offset >= root->stores_size))
++			return NULL;
++	}
 +
-+ 	BUG_ON（偏移> root->stores_size）；
++	BUG_ON(offset > root->stores_size);
 +
-+	退货；
-+ }
++	return item;
++}
 +
-+ /*
-+ * 盲目地将项目插入到树中。通常，我们重用
-+ * 第一个空的商店项目。
++/*
++ * Blindly insert the item to the tree. Typically, we reuse the
++ * first empty store item.
 + */
-+ int sradix_tree_enter(struct sradix_tree_root *root, void **item, int num)
-+ {
-+	无符号长索引；
-+	无符号整数高度；
-+ 	struct sradix_tree_node *node, *tmp = NULL;
-+ 	int offset, offset_saved;
-+ 	void **store = NULL;
-+ 	int 错误，i，j，移位；
++int sradix_tree_enter(struct sradix_tree_root *root, void **item, int num)
++{
++	unsigned long index;
++	unsigned int height;
++	struct sradix_tree_node *node, *tmp = NULL;
++	int offset, offset_saved;
++	void **store = NULL;
++	int error, i, j, shift;
 +
-+继续：
-+	索引 = 根-> 分钟；
++go_on:
++	index = root->min;
 +
-+ 	if (root->enter_node && !sradix_node_full(root, root->enter_node)) {
-+		节点 = root->enter_node;
-+ 		BUG_ON((index >> (root->shift * root->height)));
-+ 	} 其他 {
-+		节点 = 根->rnode;
-+ 		if (node == NULL || (index >> (root->shift * root->height))
-+ 		    || sradix_node_full（根，节点））{
-+			错误 = sradix_tree_extend(root, index);
-+			如果（错误）
-+				返回错误；
++	if (root->enter_node && !sradix_node_full(root, root->enter_node)) {
++		node = root->enter_node;
++		BUG_ON((index >> (root->shift * root->height)));
++	} else {
++		node = root->rnode;
++		if (node == NULL || (index >> (root->shift * root->height))
++		    || sradix_node_full(root, node)) {
++			error = sradix_tree_extend(root, index);
++			if (error)
++				return error;
 +
-+			节点 = 根->rnode;
-+ 		}
-+ 	}
-+
-+
-+	高度 = 节点-> 高度；
-+ 	shift = (height - 1) * root->shift;
-+ 	offset = (index >> shift) & root->mask;
-+	同时（移位> 0）{
-+ 		offset_saved = 偏移量；
-+ 		for (; offset < root->stores_size; offset++) {
-+ 			store = &node->stores[offset];
-+ 			tmp = *商店；
-+
-+ 			if (!tmp || !sradix_node_full(root, tmp))
-+				休息；
-+ 		}
-+ 		BUG_ON（偏移>= root->stores_size）；
-+
-+		如果（偏移量！= offset_saved）{
-+ 			index += (offset - offset_saved) << shift;
-+ 			index &= ~((1UL << shift) - 1);
-+ 		}
-+
-+		如果（！tmp）{
-+ 			if (!(tmp = root->alloc()))
-+				返回 -ENOMEM;
-+
-+ 			tmp->height = shift / root->shift;
-+ 			*商店= tmp;
-+ 			tmp->parent = 节点；
-+			节点->计数++；
-+ // 如果 (root->extend)
-+ // root->extend(node, tmp);
-+ 		}
-+
-+		节点 = tmp;
-+ 		shift -= root-> shift;
-+ 		offset = (index >> shift) & root->mask;
-+ 	}
-+
-+ 	BUG_ON（节点->高度！= 1）；
++			node = root->rnode;
++		}
++	}
 +
 +
-+ 	store = &node->stores[offset];
-+ 	for (i = 0, j = 0;
-+ 	      j < root->stores_size - node->count &&
-+ 	      i < root->stores_size - offset && j < num; 我++) {
-+		如果 (!store[i]) {
-+			商店[i] = 项目[j];
-+ 			if (root->assign)
-+ 				root->assign(node, index + i, item[j]);
-+ 			j++;
-+ 		}
-+ 	}
++	height = node->height;
++	shift = (height - 1) * root->shift;
++	offset = (index >> shift) & root->mask;
++	while (shift > 0) {
++		offset_saved = offset;
++		for (; offset < root->stores_size; offset++) {
++			store = &node->stores[offset];
++			tmp = *store;
 +
-+	节点->计数 += j；
-+ 	root->num += j;
-+	数字 -= j;
++			if (!tmp || !sradix_node_full(root, tmp))
++				break;
++		}
++		BUG_ON(offset >= root->stores_size);
 +
-+ 	while (sradix_node_full(root, node)) {
-+		节点 = 节点->父；
-+		如果（！节点）
-+			休息；
++		if (offset != offset_saved) {
++			index += (offset - offset_saved) << shift;
++			index &= ~((1UL << shift) - 1);
++		}
 +
-+		节点->fulls++；
-+ 	}
++		if (!tmp) {
++			if (!(tmp = root->alloc()))
++				return -ENOMEM;
 +
-+	如果（不太可能（！节点））{
-+ 		/* 所有节点都已满 */
-+ 		root->min = 1 << (root->height * root->shift);
-+ 		root->enter_node = NULL;
-+ 	} 其他 {
-+ 		root->min = 索引 + i - 1;
-+ 		root->min |= (1UL << (node->height - 1)) - 1;
-+ 		root->min++;
-+ 		root->enter_node = 节点；
-+ 	}
++			tmp->height = shift / root->shift;
++			*store = tmp;
++			tmp->parent = node;
++			node->count++;
++//			if (root->extend)
++//				root->extend(node, tmp);
++		}
 +
-+	如果（数量）{
-+		项目 += j;
-+		转到 go_on；
-+ 	}
++		node = tmp;
++		shift -= root->shift;
++		offset = (index >> shift) & root->mask;
++	}
 +
-+	返回 0；
-+ }
++	BUG_ON(node->height != 1);
 +
 +
-+ /**
-+ * sradix_tree_shrink - 将 sradix 树的高度缩小到最小
-+ * @root sradix 树根
++	store = &node->stores[offset];
++	for (i = 0, j = 0;
++	      j < root->stores_size - node->count &&
++	      i < root->stores_size - offset && j < num; i++) {
++		if (!store[i]) {
++			store[i] = item[j];
++			if (root->assign)
++				root->assign(node, index + i, item[j]);
++			j++;
++		}
++	}
++
++	node->count += j;
++	root->num += j;
++	num -= j;
++
++	while (sradix_node_full(root, node)) {
++		node = node->parent;
++		if (!node)
++			break;
++
++		node->fulls++;
++	}
++
++	if (unlikely(!node)) {
++		/* All nodes are full */
++		root->min = 1 << (root->height * root->shift);
++		root->enter_node = NULL;
++	} else {
++		root->min = index + i - 1;
++		root->min |= (1UL << (node->height - 1)) - 1;
++		root->min++;
++		root->enter_node = node;
++	}
++
++	if (num) {
++		item += j;
++		goto go_on;
++	}
++
++	return 0;
++}
++
++
++/**
++ *	sradix_tree_shrink    -    shrink height of a sradix tree to minimal
++ *      @root		sradix tree root
 + *
 + */
-+静态内联 void sradix_tree_shrink(struct sradix_tree_root *root)
-+ {
-+ 	/* 尝试缩小树高 */
-+ 	while (root->height > 1) {
-+ 		struct sradix_tree_node *to_free = root->rnode;
++static inline void sradix_tree_shrink(struct sradix_tree_root *root)
++{
++	/* try to shrink tree height */
++	while (root->height > 1) {
++		struct sradix_tree_node *to_free = root->rnode;
 +
-+ 		/*
-+ 		 * 候选节点有多个子节点，或其子节点
-+ 		 * 不在最左边的商店，我们不能缩小。
-+ 		 */
-+ 		if (to_free->count != 1 || !to_free->stores[0])
++		/*
++		 * The candidate node has more than one child, or its child
++		 * is not at the leftmost store, we cannot shrink.
++		 */
++		if (to_free->count != 1 || !to_free->stores[0])
 +			break;
 +
 +		root->rnode = to_free->stores[0];
@@ -1009,70 +1009,70 @@ index a5dae9a7eb51..eda3a78226b0 100644
 +	mapped user space applications with an significantly improved scan speed
 +	and CPU efficiency. Since KVM is friendly to KSM, KVM can also benefit from
 +	UKSM. Now UKSM has its first stable release and first real world enterprise user.
-+	有关更多信息，请转到其项目页面。
-+ 	(github.com/dolohow/uksm)
++	For more information, please goto its project page.
++	(github.com/dolohow/uksm)
 +
-+配置 KSM_LEGACY
-+ 	bool“旧版 KSM 实施”
-+	取决于 KSM
-+	帮助
-+	来自 Red Hat 的传统 KSM 实现。
-+最终选择
++config KSM_LEGACY
++	bool "Legacy KSM implementation"
++	depends on KSM
++	help
++	The legacy KSM implementation from Red Hat.
++endchoice
  
- 配置 DEFAULT_MMAP_MIN_ADDR
-         int "低地址空间以防止用户分配"
+ config DEFAULT_MMAP_MIN_ADDR
+         int "Low address space to protect from user allocation"
 diff --git a/mm/Makefile b/mm/Makefile
-索引 d996846697ef..786cb9fad4b9 100644
+index d996846697ef..786cb9fad4b9 100644
 --- a/mm/Makefile
 +++ b/mm/Makefile
-@@ -66,7 +66,8 @@ obj-$(CONFIG_SPARSEMEM) += sparse.o
+@@ -66,7 +66,8 @@ obj-$(CONFIG_SPARSEMEM)	+= sparse.o
  obj-$(CONFIG_SPARSEMEM_VMEMMAP) += sparse-vmemmap.o
  obj-$(CONFIG_SLOB) += slob.o
  obj-$(CONFIG_MMU_NOTIFIER) += mmu_notifier.o
-- obj-$(CONFIG_KSM) += ksm.o
-+ obj-$(CONFIG_KSM_LEGACY) += ksm.o
-+ obj-$(CONFIG_UKSM) += uksm.o
+-obj-$(CONFIG_KSM) += ksm.o
++obj-$(CONFIG_KSM_LEGACY) += ksm.o
++obj-$(CONFIG_UKSM) += uksm.o
  obj-$(CONFIG_PAGE_POISONING) += page_poison.o
- obj-$(CONFIG_SLAB) +=slab.o
+ obj-$(CONFIG_SLAB) += slab.o
  obj-$(CONFIG_SLUB) += slub.o
-差异 --git a/mm/ksm.cb/mm/ksm.c
-索引 7905934cd3ad..3e9d0064eaf2 100644
+diff --git a/mm/ksm.c b/mm/ksm.c
+index 7905934cd3ad..3e9d0064eaf2 100644
 --- a/mm/ksm.c
 +++ b/mm/ksm.c
 @@ -857,17 +857,6 @@ static int unmerge_ksm_pages(struct vm_area_struct *vma,
- 	返回错误；
+ 	return err;
  }
  
--静态内联结构 stable_node *page_stable_node(struct page *page)
-- {
--	返回 PageKsm(page) ？page_rmapping(page) : NULL;
-- }
-——
--静态内联 void set_page_stable_node(struct page *page,
-- 					struct stable_node *stable_node)
-- {
-- 	page->mapping = (void *)((unsigned long)stable_node | PAGE_MAPPING_KSM);
-- }
-——
+-static inline struct stable_node *page_stable_node(struct page *page)
+-{
+-	return PageKsm(page) ? page_rmapping(page) : NULL;
+-}
+-
+-static inline void set_page_stable_node(struct page *page,
+-					struct stable_node *stable_node)
+-{
+-	page->mapping = (void *)((unsigned long)stable_node | PAGE_MAPPING_KSM);
+-}
+-
  #ifdef CONFIG_SYSFS
  /*
-  * 仅通过 sysfs 控制接口调用：
-diff --git a/mm/memory.cb/mm/memory.c
-索引 45442d9a4f52..9beaa229bb0d 100644
+  * Only called through the sysfs control interface:
+diff --git a/mm/memory.c b/mm/memory.c
+index 45442d9a4f52..9beaa229bb0d 100644
 --- a/mm/memory.c
 +++ b/mm/memory.c
 @@ -144,6 +144,25 @@ EXPORT_SYMBOL(zero_pfn);
  
- 无符号长highest_memmap_pfn __read_mostly；
+ unsigned long highest_memmap_pfn __read_mostly;
  
-+ #ifdef CONFIG_UKSM
-+ unsigned long uksm_zero_pfn __read_mostly;
-+ EXPORT_SYMBOL_GPL(uksm_zero_pfn);
-+ struct page *empty_uksm_zero_page;
++#ifdef CONFIG_UKSM
++unsigned long uksm_zero_pfn __read_mostly;
++EXPORT_SYMBOL_GPL(uksm_zero_pfn);
++struct page *empty_uksm_zero_page;
 +
-+静态 int __init setup_uksm_zero_page(void)
-+ {
-+ 	empty_uksm_zero_page = alloc_pages(__GFP_ZERO & ~__GFP_MOVABLE, 0);
++static int __init setup_uksm_zero_page(void)
++{
++	empty_uksm_zero_page = alloc_pages(__GFP_ZERO & ~__GFP_MOVABLE, 0);
 +	if (!empty_uksm_zero_page)
 +		panic("Oh boy, that early out of memory?");
 +
@@ -1123,98 +1123,98 @@ diff --git a/mm/memory.cb/mm/memory.c
  				if (pte_dirty(ptent)) {
 @@ -2230,6 +2257,7 @@ static inline bool cow_user_page(struct page *dst, struct page *src,
  
- 	如果（可能（src））{
+ 	if (likely(src)) {
  		copy_user_highpage(dst, src, addr, vma);
-+ 		uksm_cow_page(vma, src);
- 		返回真；
++		uksm_cow_page(vma, src);
+ 		return true;
  	}
  
-@@ -2457,6 +2485,7 @@静态 vm_fault_t wp_page_copy(struct vm_fault *vmf)
- 							      vmf->地址）；
- 		如果 (!new_page)
- 			转到 oom;
-+ 		uksm_cow_pte(vma, vmf->orig_pte);
- 	} 别的 {
+@@ -2457,6 +2485,7 @@ static vm_fault_t wp_page_copy(struct vm_fault *vmf)
+ 							      vmf->address);
+ 		if (!new_page)
+ 			goto oom;
++		uksm_cow_pte(vma, vmf->orig_pte);
+ 	} else {
  		new_page = alloc_page_vma(GFP_HIGHUSER_MOVABLE, vma,
- 				vmf->地址）；
-@@ -2498,7 +2527,9 @@静态 vm_fault_t wp_page_copy(struct vm_fault *vmf)
+ 				vmf->address);
+@@ -2498,7 +2527,9 @@ static vm_fault_t wp_page_copy(struct vm_fault *vmf)
  						mm_counter_file(old_page));
  				inc_mm_counter_fast(mm, MM_ANONPAGES);
  			}
-+ 			uksm_bugon_zeropage(vmf->orig_pte);
- 		} 别的 {
-+ 			uksm_unmap_zero_page(vmf->orig_pte);
++			uksm_bugon_zeropage(vmf->orig_pte);
+ 		} else {
++			uksm_unmap_zero_page(vmf->orig_pte);
  			inc_mm_counter_fast(mm, MM_ANONPAGES);
  		}
- 		刷新缓存页面（vma，vmf->地址，pte_pfn（vmf->orig_pte））；
-差异 --git a/mm/mmap.cb/mm/mmap.c
-索引 a7d8c84d19b7..797582240047 100644
+ 		flush_cache_page(vma, vmf->address, pte_pfn(vmf->orig_pte));
+diff --git a/mm/mmap.c b/mm/mmap.c
+index a7d8c84d19b7..797582240047 100644
 --- a/mm/mmap.c
 +++ b/mm/mmap.c
 @@ -46,6 +46,7 @@
  #include <linux/moduleparam.h>
  #include <linux/pkeys.h>
  #include <linux/oom.h>
-+ #include <linux/ksm.h>
++#include <linux/ksm.h>
  #include <linux/sched/mm.h>
  
  #include <linux/uaccess.h>
-@@ -184,6 +185,7 @@静态结构 vm_area_struct *remove_vma(struct vm_area_struct *vma)
- 	如果（vma->vm_file）
+@@ -184,6 +185,7 @@ static struct vm_area_struct *remove_vma(struct vm_area_struct *vma)
+ 	if (vma->vm_file)
  		fput(vma->vm_file);
  	mpol_put(vma_policy(vma));
-+        uksm_remove_vma(vma);
++       uksm_remove_vma(vma);
  	vm_area_free(vma);
- 	接下来返回；
+ 	return next;
  }
 @@ -736,9 +738,16 @@ int __vma_adjust(struct vm_area_struct *vma, unsigned long start,
  	long adjust_next = 0;
  	int remove_next = 0;
  
-+ /*
-+ * 为避免死锁，必须在任何 spin_lock 之前完成 ksm_remove_vma
-+ * 获得
++/*
++ * to avoid deadlock, ksm_remove_vma must be done before any spin_lock is
++ * acquired
 + */
-+ 	uksm_remove_vma(vma);
++	uksm_remove_vma(vma);
 +
- 	如果（下一个 && ！插入）{
+ 	if (next && !insert) {
  		struct vm_area_struct *exporter = NULL, *importer = NULL;
  
-+ 		uksm_remove_vma（下一个）；
++		uksm_remove_vma(next);
  		if (end >= next->vm_end) {
  			/*
- 			 * vma 扩展，重叠所有下一个，并且
+ 			 * vma expands, overlapping all the next, and
 @@ -871,6 +880,7 @@ int __vma_adjust(struct vm_area_struct *vma, unsigned long start,
- 		end_changed = 真；
+ 		end_changed = true;
  	}
  	vma->vm_pgoff = pgoff;
 +
- 	如果（adjust_next）{
+ 	if (adjust_next) {
  		next->vm_start += adjust_next << PAGE_SHIFT;
  		next->vm_pgoff += adjust_next;
 @@ -976,6 +986,7 @@ int __vma_adjust(struct vm_area_struct *vma, unsigned long start,
- 		如果（remove_next == 2）{
+ 		if (remove_next == 2) {
  			remove_next = 1;
- 			结束 = 下一个-> vm_end;
-+ 			uksm_remove_vma（下一个）；
- 			再次转到；
+ 			end = next->vm_end;
++			uksm_remove_vma(next);
+ 			goto again;
  		}
- 		否则如果（下一个）
+ 		else if (next)
 @@ -1002,10 +1013,14 @@ int __vma_adjust(struct vm_area_struct *vma, unsigned long start,
  			 */
  			VM_WARN_ON(mm->highest_vm_end != vm_end_gap(vma));
  		}
-+ 	} 其他 {
-+ 		if (next && !insert)
-+ 			uksm_vma_add_new（下一个）；
++	} else {
++		if (next && !insert)
++			uksm_vma_add_new(next);
  	}
- 	如果（插入&&文件）
- 		uprobe_mmap（插入）；
+ 	if (insert && file)
+ 		uprobe_mmap(insert);
  
-+ 	uksm_vma_add_new(vma);
- 	验证_毫米（毫米）；
++	uksm_vma_add_new(vma);
+ 	validate_mm(mm);
  
- 	返回0；
+ 	return 0;
 @@ -1465,6 +1480,9 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
  	vm_flags |= calc_vm_prot_bits(prot, pkey) | calc_vm_flag_bits(flags) |
  			mm->def_flags | VM_MAYREAD | VM_MAYWRITE | VM_MAYEXEC;
@@ -1262,147 +1262,147 @@ diff --git a/mm/memory.cb/mm/memory.c
  	vma->vm_flags = flags;
  	vma->vm_page_prot = vm_get_page_prot(flags);
  	vma_link(mm, vma, prev, rb_link, rb_parent);
-+ 	uksm_vma_add_new(vma);
- 出去：
++	uksm_vma_add_new(vma);
+ out:
  	perf_event_mmap(vma);
  	mm->total_vm += len >> PAGE_SHIFT;
 @@ -3138,6 +3162,12 @@ void exit_mmap(struct mm_struct *mm)
  		up_write(&mm->mmap_sem);
  	}
  
-+ 	/*
-+ 	 * 对 mmap_sem 进行写锁定不会伤害他人，
-+ 	 * 但对于 uksm 来说，避免比赛至关重要。
-+ 	 */
-+ 	down_write(&mm->mmap_sem);
++	/*
++	 * Taking write lock on mmap_sem does not harm others,
++	 * but it's crucial for uksm to avoid races.
++	 */
++	down_write(&mm->mmap_sem);
 +
- 	如果（毫米->locked_vm）{
- 		vma = mm-> mmap;
- 		而 (vma) {
+ 	if (mm->locked_vm) {
+ 		vma = mm->mmap;
+ 		while (vma) {
 @@ -3172,6 +3202,11 @@ void exit_mmap(struct mm_struct *mm)
  		vma = remove_vma(vma);
  	}
  	vm_unacct_memory(nr_accounted);
 +
-+ 	mm-> mmap = NULL;
-+ 	mm->mm_rb = RB_ROOT;
-+ 	vmacache_invalidate(mm);
-+ 	up_write(&mm->mmap_sem);
++	mm->mmap = NULL;
++	mm->mm_rb = RB_ROOT;
++	vmacache_invalidate(mm);
++	up_write(&mm->mmap_sem);
  }
  
- /* 将vm结构插入到按地址排序的进程列表中
+ /* Insert vm structure into process list sorted by address
 @@ -3279,6 +3314,7 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
  			new_vma->vm_ops->open(new_vma);
  		vma_link(mm, new_vma, prev, rb_link, rb_parent);
  		*need_rmap_locks = false;
-+ 		uksm_vma_add_new(new_vma);
++		uksm_vma_add_new(new_vma);
  	}
- 	返回 new_vma;
+ 	return new_vma;
  
-@@ -3429,6 +3465,7 @@静态结构 vm_area_struct *__install_special_mapping(
+@@ -3429,6 +3465,7 @@ static struct vm_area_struct *__install_special_mapping(
  	vm_stat_account(mm, vma->vm_flags, len >> PAGE_SHIFT);
  
  	perf_event_mmap(vma);
-+ 	uksm_vma_add_new(vma);
++	uksm_vma_add_new(vma);
  
- 	返回 vma；
+ 	return vma;
  
-差异 --git a/mm/uksm.cb/mm/uksm.c
-新文件模式 100644
-索引 000000000000..ef068d5dc307
---- /开发/空
+diff --git a/mm/uksm.c b/mm/uksm.c
+new file mode 100644
+index 000000000000..ef068d5dc307
+--- /dev/null
 +++ b/mm/uksm.c
 @@ -0,0 +1,5613 @@
-+ /*
-+ * 超 KSM。版权所有 (C) 2011-2012 耐夏
++/*
++ * Ultra KSM. Copyright (C) 2011-2012 Nai Xia
 + *
-+ * 这是对 KSM 的改进。一些基本的数据结构和例程
-+ * 是从 ksm.c 借来的。
++ * This is an improvement upon KSM. Some basic data structures and routines
++ * are borrowed from ksm.c .
 + *
-+ * 其新功能：
-+ * 1. 全系统扫描：
-+ * 它会自动扫描所有用户进程的匿名 VMA。内核用户
-+ * 不再需要向 KSM 提交内存区域的交互。
++ * Its new features:
++ * 1. Full system scan:
++ *      It automatically scans all user processes' anonymous VMAs. Kernel-user
++ *      interaction to submit a memory area to KSM is no longer needed.
 + *
-+ * 2.丰富的区域检测：
-+ * 自动检测含有大量重复的丰富区域
-+ * 基于页面。丰富的区域被赋予全扫描速度。贫困地区是
-+ * 以合理的速度采样，CPU 消耗非常低。
++ * 2. Rich area detection:
++ *      It automatically detects rich areas containing abundant duplicated
++ *      pages based. Rich areas are given a full scan speed. Poor areas are
++ *      sampled at a reasonable speed with very low CPU consumption.
 + *
-+ * 3. 超每页扫描速度提升：
-+ * 提出了一种新的哈希算法。结果，在一台机器上
-+ * Core(TM)2 Quad Q9300 CPU in 32-bit mode and 800MHZ DDR2 main memory, it
-+ * 可以扫描不包含重复页面的内存区域的速度
-+ * 627MB/sec ~ 2445MB/sec 并且可以以
-+ * 477MB/秒 ~ 923MB/秒。
++ * 3. Ultra Per-page scan speed improvement:
++ *      A new hash algorithm is proposed. As a result, on a machine with
++ *      Core(TM)2 Quad Q9300 CPU in 32-bit mode and 800MHZ DDR2 main memory, it
++ *      can scan memory areas that does not contain duplicated pages at speed of
++ *      627MB/sec ~ 2445MB/sec and can merge duplicated areas at speed of
++ *      477MB/sec ~ 923MB/sec.
 + *
-+ * 4. 避免震荡区域：
-+ * 抖动区域（Ksm 分页频繁的 VMA）可以是
-+ * 过滤掉。我的基准测试表明它比 KSM 的每页效率更高
-+ * 基于哈希值的易失性页面检测。
++ * 4. Thrashing area avoidance:
++ *      Thrashing area(an VMA that has frequent Ksm page break-out) can be
++ *      filtered out. My benchmark shows it's more efficient than KSM's per-page
++ *      hash value based volatile page detection.
 + *
 + *
-+ * 5. KSM 上的其他更改：
-+ * * 它有一个专用于 4 字节对齐页面的完全 x86 优化的 memcmp
-+ * 比较。它比 x86 上的默认 C 版本快得多。
-+ * * rmap_item 现在有一个 struct *page 成员来松散地缓存一个
-+ * 地址-->页面映射，减少太多时间成本
-+ * follow_page()。
-+ * * VMA 创建/退出程序被挂钩以让 Ultra KSM 知道。
-+ * * try_to_merge_two_pages() 现在可以在失败时恢复 pte。没有休息_
-+ * 这种情况下需要 ksm。
++ * 5. Misc changes upon KSM:
++ *      * It has a fully x86-opitmized memcmp dedicated for 4-byte-aligned page
++ *        comparison. It's much faster than default C version on x86.
++ *      * rmap_item now has an struct *page member to loosely cache a
++ *        address-->page mapping, which reduces too much time-costly
++ *        follow_page().
++ *      * The VMA creation/exit procedures are hooked to let the Ultra KSM know.
++ *      * try_to_merge_two_pages() now can revert a pte if it fails. No break_
++ *        ksm is needed for this case.
 + *
-+ * 6. 全零页考虑（由 Figo Zhang 提供）
-+ * 现在 uksmd 将完整的零页视为特殊页面并将它们合并到一个
-+ * 特殊的不可交换的 uksm 零页。
++ * 6. Full Zero Page consideration(contributed by Figo Zhang)
++ *    Now uksmd consider full zero pages as special pages and merge them to an
++ *    special unswappable uksm zero page.
 + */
 +
-+ #include <linux/errno.h>
-+ #include <linux/mm.h>
-+ #include <linux/fs.h>
-+ #include <linux/mman.h>
-+ #include <linux/sched.h>
-+ #include <linux/sched/mm.h>
-+ #include <linux/sched/coredump.h>
-+ #include <linux/sched/cputime.h>
-+ #include <linux/rwsem.h>
-+ #include <linux/pagemap.h>
-+ #include <linux/rmap.h>
-+ #include <linux/spinlock.h>
-+ #include <linux/jhash.h>
-+ #include <linux/delay.h>
-+ #include <linux/kthread.h>
-+ #include <linux/wait.h>
-+ #include <linux/slab.h>
-+ #include <linux/rbtree.h>
-+ #include <linux/memory.h>
-+ #include <linux/mmu_notifier.h>
-+ #include <linux/swap.h>
-+ #include <linux/ksm.h>
-+ #include <linux/crypto.h>
-+ #include <linux/scatterlist.h>
-+ #include <crypto/hash.h>
-+ #include <linux/random.h>
-+ #include <linux/math64.h>
-+ #include <linux/gcd.h>
-+ #include <linux/freezer.h>
-+ #include <linux/oom.h>
-+ #include <linux/numa.h>
-+ #include <linux/sradix-tree.h>
++#include <linux/errno.h>
++#include <linux/mm.h>
++#include <linux/fs.h>
++#include <linux/mman.h>
++#include <linux/sched.h>
++#include <linux/sched/mm.h>
++#include <linux/sched/coredump.h>
++#include <linux/sched/cputime.h>
++#include <linux/rwsem.h>
++#include <linux/pagemap.h>
++#include <linux/rmap.h>
++#include <linux/spinlock.h>
++#include <linux/jhash.h>
++#include <linux/delay.h>
++#include <linux/kthread.h>
++#include <linux/wait.h>
++#include <linux/slab.h>
++#include <linux/rbtree.h>
++#include <linux/memory.h>
++#include <linux/mmu_notifier.h>
++#include <linux/swap.h>
++#include <linux/ksm.h>
++#include <linux/crypto.h>
++#include <linux/scatterlist.h>
++#include <crypto/hash.h>
++#include <linux/random.h>
++#include <linux/math64.h>
++#include <linux/gcd.h>
++#include <linux/freezer.h>
++#include <linux/oom.h>
++#include <linux/numa.h>
++#include <linux/sradix-tree.h>
 +
-+ #include <asm/tlbflush.h>
-+ #include "internal.h"
++#include <asm/tlbflush.h>
++#include "internal.h"
 +
-+ #ifdef CONFIG_X86
-+ #undef memcmp
++#ifdef CONFIG_X86
++#undef memcmp
 +
-+ #ifdef CONFIG_X86_32
-+ #define memcmp memcmpx86_32
-+ /*
-+ * 比较 4 字节对齐的地址 s1 和 s2，长度为 n
++#ifdef CONFIG_X86_32
++#define memcmp memcmpx86_32
++/*
++ * Compare 4-byte-aligned address s1 and s2, with length n
 + */
-+ int memcmpx86_32(void *s1, void *s2, size_t n)
-+ {
++int memcmpx86_32(void *s1, void *s2, size_t n)
++{
 +	size_t num = n / 4;
 +	register int res;
 +
@@ -1494,71 +1494,71 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	for (i = 0; i < len; i++) {
 +		if (src[i])
 +			return 0;
-+ 	}
++	}
 +
-+	返回 1；
-+ }
-+ #endif
++	return 1;
++}
++#endif
 +
-+ #define UKSM_RUNG_ROUND_FINISHED (1 << 0)
-+ #define TIME_RATIO_SCALE 10000
++#define UKSM_RUNG_ROUND_FINISHED  (1 << 0)
++#define TIME_RATIO_SCALE	10000
 +
-+ #define SLOT_TREE_NODE_SHIFT 8
-+ #define SLOT_TREE_NODE_STORE_SIZE (1UL << SLOT_TREE_NODE_SHIFT)
-+ struct slot_tree_node {
-+	无符号长尺寸；
-+ 	struct sradix_tree_node snode;
-+ 	void *stores[SLOT_TREE_NODE_STORE_SIZE];
-+ };
++#define SLOT_TREE_NODE_SHIFT	8
++#define SLOT_TREE_NODE_STORE_SIZE	(1UL << SLOT_TREE_NODE_SHIFT)
++struct slot_tree_node {
++	unsigned long size;
++	struct sradix_tree_node snode;
++	void *stores[SLOT_TREE_NODE_STORE_SIZE];
++};
 +
-+静态结构 kmem_cache *slot_tree_node_cachep;
++static struct kmem_cache *slot_tree_node_cachep;
 +
-+静态结构 sradix_tree_node *slot_tree_node_alloc(void)
-+ {
-+ 	struct slot_tree_node *p;
++static struct sradix_tree_node *slot_tree_node_alloc(void)
++{
++	struct slot_tree_node *p;
 +
-+ 	p = kmem_cache_zalloc(slot_tree_node_cachep, GFP_KERNEL |
-+ 			      __GFP_NORETRY | __GFP_NOWARN);
-+	如果 (!p)
-+		返回空；
++	p = kmem_cache_zalloc(slot_tree_node_cachep, GFP_KERNEL |
++			      __GFP_NORETRY | __GFP_NOWARN);
++	if (!p)
++		return NULL;
 +
-+	返回 &p->snode;
-+ }
++	return &p->snode;
++}
 +
-+静态无效 slot_tree_node_free(struct sradix_tree_node *node)
-+ {
-+ 	struct slot_tree_node *p;
++static void slot_tree_node_free(struct sradix_tree_node *node)
++{
++	struct slot_tree_node *p;
 +
-+ 	p = container_of(node, struct slot_tree_node, snode);
-+ 	kmem_cache_free(slot_tree_node_cachep, p);
-+ }
++	p = container_of(node, struct slot_tree_node, snode);
++	kmem_cache_free(slot_tree_node_cachep, p);
++}
 +
-+ static void slot_tree_node_extend(struct sradix_tree_node *parent,
-+ 				  struct sradix_tree_node *child)
-+ {
-+ 	struct slot_tree_node *p, *c;
++static void slot_tree_node_extend(struct sradix_tree_node *parent,
++				  struct sradix_tree_node *child)
++{
++	struct slot_tree_node *p, *c;
 +
-+ 	p = container_of(parent, struct slot_tree_node, snode);
-+ 	c = container_of(child, struct slot_tree_node, snode);
++	p = container_of(parent, struct slot_tree_node, snode);
++	c = container_of(child, struct slot_tree_node, snode);
 +
-+ 	p->size += c->size;
-+ }
++	p->size += c->size;
++}
 +
-+ void slot_tree_node_assign(struct sradix_tree_node *node,
-+ 			   unsigned int 索引，void *item)
-+ {
-+ 	struct vma_slot *slot = item;
-+ 	struct slot_tree_node *cur;
++void slot_tree_node_assign(struct sradix_tree_node *node,
++			   unsigned int index, void *item)
++{
++	struct vma_slot *slot = item;
++	struct slot_tree_node *cur;
 +
-+ 	slot->snode = 节点；
-+ 	slot->sindex = 索引；
++	slot->snode = node;
++	slot->sindex = index;
 +
-+	同时（节点）{
-+ 		cur = container_of(node, struct slot_tree_node, snode);
-+ 		cur->size += slot->pages;
-+		节点 = 节点->父；
-+ 	}
-+ }
++	while (node) {
++		cur = container_of(node, struct slot_tree_node, snode);
++		cur->size += slot->pages;
++		node = node->parent;
++	}
++}
 +
 +void slot_tree_node_rm(struct sradix_tree_node *node, unsigned int offset)
 +{
@@ -1673,107 +1673,107 @@ diff --git a/mm/memory.cb/mm/memory.c
 + */
 +struct tree_node {
 +	struct rb_node node; /* link in the main (un)stable rbtree */
-+ 	struct rb_root sub_root; /* rb_root 用于子级碰撞 rbtree */
-+ 	u32 哈希值；
-+	无符号长计数；/* TODO: 与 sub_root 合并 */
-+ 	struct list_head all_list; /* 稳定/不稳定树中的所有树节点 */
-+ };
++	struct rb_root sub_root; /* rb_root for sublevel collision rbtree */
++	u32 hash;
++	unsigned long count; /* TODO: merged with sub_root */
++	struct list_head all_list; /* all tree nodes in stable/unstable tree */
++};
 +
-+ /**
-+ * struct stable_node - 稳定 rbtree 的节点
-+ * @node: 稳定树中此 ksm 页面的 rb 节点
-+ * @hlist: 使用这个 ksm 页面的 rmap_items 的 hlist 头
-+ * @kpfn: 此 ksm 页面的页框编号
++/**
++ * struct stable_node - node of the stable rbtree
++ * @node: rb node of this ksm page in the stable tree
++ * @hlist: hlist head of rmap_items using this ksm page
++ * @kpfn: page frame number of this ksm page
 + */
-+ struct stable_node {
-+ 	struct rb_node 节点；/* 子 rbtree 中的链接 */
-+ 	struct tree_node *tree_node; /* 它是稳定树中的树节点根，如果它在地狱列表中则为 NULL */
-+ 	struct hlist_head hlist;
-+	无符号长 kpfn；
-+ 	u32 hash_max; /* 如果 ==0 则尚未计算 */
-+ 	struct list_head all_list; /* 在所有稳定节点的列表中 */
-+ };
++struct stable_node {
++	struct rb_node node; /* link in sub-rbtree */
++	struct tree_node *tree_node; /* it's tree node root in stable tree, NULL if it's in hell list */
++	struct hlist_head hlist;
++	unsigned long kpfn;
++	u32 hash_max; /* if ==0 then it's not been calculated yet */
++	struct list_head all_list; /* in a list for all stable nodes */
++};
 +
-+ /**
-+ * struct node_vma - 组 rmap_items 链接在同一个稳定
-+ * 节点在一起。
++/**
++ * struct node_vma - group rmap_items linked in a same stable
++ * node together.
 + */
-+ struct node_vma {
-+	联合 {
-+ 		struct vma_slot *slot;
-+		无符号长密钥；/* 插槽用作在 hlist 上排序的键 */
-+ 	};
-+ 	struct hlist_node hlist;
-+ 	struct hlist_head rmap_hlist;
-+ 	struct stable_node *head;
-+ };
++struct node_vma {
++	union {
++		struct vma_slot *slot;
++		unsigned long key;  /* slot is used as key sorted on hlist */
++	};
++	struct hlist_node hlist;
++	struct hlist_head rmap_hlist;
++	struct stable_node *head;
++};
 +
-+ /**
-+ * struct rmap_item - 虚拟地址的反向映射项
-+ * @rmap_list: mm_slot 的单链接 rmap_list 中的下一个 rmap_item
-+ * @anon_vma：在稳定树中时指向此 mm、地址的 anon_vma 的指针
-+ * @mm: 这个 rmap_item 指向的内存结构
-+ * @address：rmap_item 跟踪的虚拟地址（+ 低位标志）
-+ * @node: 不稳定树中此 rmap_item 的 rb 节点
-+ * @head: 指向 stable_node 的指针，在稳定树中指向这个列表
-+ * @hlist：链接到挂在该 stable_node 上的 rmap_items 的 hlist
++/**
++ * struct rmap_item - reverse mapping item for virtual addresses
++ * @rmap_list: next rmap_item in mm_slot's singly-linked rmap_list
++ * @anon_vma: pointer to anon_vma for this mm,address, when in stable tree
++ * @mm: the memory structure this rmap_item is pointing into
++ * @address: the virtual address this rmap_item tracks (+ flags in low bits)
++ * @node: rb node of this rmap_item in the unstable tree
++ * @head: pointer to stable_node heading this list in the stable tree
++ * @hlist: link into hlist of rmap_items hanging off that stable_node
 + */
-+结构 rmap_item {
-+ 	struct vma_slot *slot;
-+ 	struct page *page;
-+	无符号长地址；/* + 用于以下标志的低位 */
-+ 	unsigned long hash_round;
-+ 	unsigned long entry_index;
-+	联合 {
-+ 		struct {/* 在不稳定的树中 */
-+ 			struct rb_node 节点；
-+ 			struct tree_node *tree_node;
-+ 			u32 hash_max;
-+ 		};
-+ 		struct { /* 当在稳定树中时 */
-+ 			struct node_vma *head;
-+ 			struct hlist_node hlist;
-+ 			struct anon_vma *anon_vma;
-+ 		};
-+ 	};
-+ } __aligned(4);
++struct rmap_item {
++	struct vma_slot *slot;
++	struct page *page;
++	unsigned long address;	/* + low bits used for flags below */
++	unsigned long hash_round;
++	unsigned long entry_index;
++	union {
++		struct {/* when in unstable tree */
++			struct rb_node node;
++			struct tree_node *tree_node;
++			u32 hash_max;
++		};
++		struct { /* when in stable tree */
++			struct node_vma *head;
++			struct hlist_node hlist;
++			struct anon_vma *anon_vma;
++		};
++	};
++} __aligned(4);
 +
-+ struct rmap_list_entry {
-+	联合 {
-+ 		struct rmap_item *item;
-+		无符号长地址；
-+ 	};
-+ 	/* 最低位用于 is_addr 标签 */
-+ } __aligned(4); /* 4 对齐以适应页面*/
-+
-+
-+ /* 基本数据结构定义结束 */
++struct rmap_list_entry {
++	union {
++		struct rmap_item *item;
++		unsigned long addr;
++	};
++	/* lowest bit is used for is_addr tag */
++} __aligned(4); /* 4 aligned to fit in to pages*/
 +
 +
-+ /*
-+ * rmap_item 判断它是否在稳定/不稳定树中的标志。
-+ * 标志使用 rmap_item.address 的低位
++/* Basic data structure definition ends */
++
++
++/*
++ * Flags for rmap_item to judge if it's listed in the stable/unstable tree.
++ * The flags use the low bits of rmap_item.address
 + */
-+ #define UNSTABLE_FLAG 0x1
-+ #define STABLE_FLAG 0x2
-+ #define get_rmap_addr(x) ((x)->address & PAGE_MASK)
++#define UNSTABLE_FLAG	0x1
++#define STABLE_FLAG	0x2
++#define get_rmap_addr(x)	((x)->address & PAGE_MASK)
 +
-+ /*
-+ * rmap_list_entry 助手
++/*
++ * rmap_list_entry helpers
 + */
-+ #define IS_ADDR_FLAG 1
-+ #define is_addr(ptr) ((unsigned long)(ptr) & IS_ADDR_FLAG)
-+ #define set_is_addr(ptr) ((ptr) |= IS_ADDR_FLAG)
-+ #define get_clean_addr(ptr) (((ptr) & ~(__typeof__(ptr))IS_ADDR_FLAG))
++#define IS_ADDR_FLAG	1
++#define is_addr(ptr)		((unsigned long)(ptr) & IS_ADDR_FLAG)
++#define set_is_addr(ptr)	((ptr) |= IS_ADDR_FLAG)
++#define get_clean_addr(ptr)	(((ptr) & ~(__typeof__(ptr))IS_ADDR_FLAG))
 +
 +
-+ /*
-+ * 频繁分配和释放结构的高速缓存
++/*
++ * High speed caches for frequently allocated and freed structs
 + */
-+静态结构 kmem_cache *rmap_item_cache;
-+静态结构 kmem_cache *stable_node_cache;
-+静态结构 kmem_cache *node_vma_cache;
-+静态结构 kmem_cache *vma_slot_cache;
++static struct kmem_cache *rmap_item_cache;
++static struct kmem_cache *stable_node_cache;
++static struct kmem_cache *node_vma_cache;
++static struct kmem_cache *vma_slot_cache;
 +static struct kmem_cache *tree_node_cache;
 +#define UKSM_KMEM_CACHE(__struct, __flags) kmem_cache_create("uksm_"#__struct,\
 +		sizeof(struct __struct), __alignof__(struct __struct),\
@@ -2087,86 +2087,86 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	kmem_cache_free(stable_node_cache, stable_node);
 +}
 +
-+静态内联结构 tree_node *alloc_tree_node(struct list_head *list)
-+ {
-+ 	struct tree_node *node;
++static inline struct tree_node *alloc_tree_node(struct list_head *list)
++{
++	struct tree_node *node;
 +
-+	节点 = kmem_cache_zalloc(tree_node_cache, GFP_KERNEL |
-+ 				 __GFP_NORETRY | __GFP_NOWARN);
-+	如果（！节点）
-+		返回空；
++	node = kmem_cache_zalloc(tree_node_cache, GFP_KERNEL |
++				 __GFP_NORETRY | __GFP_NOWARN);
++	if (!node)
++		return NULL;
 +
-+ 	list_add(&node->all_list, list);
-+	返回节点；
-+ }
++	list_add(&node->all_list, list);
++	return node;
++}
 +
-+静态内联 void free_tree_node(struct tree_node *node)
-+ {
-+ 	list_del(&node->all_list);
-+ 	kmem_cache_free（tree_node_cache，节点）；
-+ }
++static inline void free_tree_node(struct tree_node *node)
++{
++	list_del(&node->all_list);
++	kmem_cache_free(tree_node_cache, node);
++}
 +
-+静态无效 uksm_drop_anon_vma(struct rmap_item *rmap_item)
-+ {
-+ 	struct anon_vma *anon_vma = rmap_item->anon_vma;
++static void uksm_drop_anon_vma(struct rmap_item *rmap_item)
++{
++	struct anon_vma *anon_vma = rmap_item->anon_vma;
 +
-+ 	put_anon_vma(anon_vma);
-+ }
++	put_anon_vma(anon_vma);
++}
 +
 +
-+ /**
-+ * 从 stable_tree 中删除一个稳定节点，可能会与它的 tree_node 断开链接并且
-+ * 如果没有其他稳定节点未决，则可以删除其父 tree_node。
++/**
++ * Remove a stable node from stable_tree, may unlink from its tree_node and
++ * may remove its parent tree_node if no other stable node is pending.
 + *
-+ * @stable_node 需要移除的节点
-+ * @unlink_rb 这个节点会从 rbtree 中取消链接吗？
-+ * @remove_tree_ node 如果为空，它的 tree_node 会被删除吗？
++ * @stable_node	    The node need to be removed
++ * @unlink_rb	    Will this node be unlinked from the rbtree?
++ * @remove_tree_    node Will its tree_node be removed if empty?
 + */
-+ static void remove_node_from_stable_tree(struct stable_node *stable_node,
-+ 					 int unlink_rb, int remove_tree_node)
-+ {
-+ 	struct node_vma *node_vma;
-+ 	struct rmap_item *rmap_item;
-+ 	struct hlist_node *n;
++static void remove_node_from_stable_tree(struct stable_node *stable_node,
++					 int unlink_rb,  int remove_tree_node)
++{
++	struct node_vma *node_vma;
++	struct rmap_item *rmap_item;
++	struct hlist_node *n;
 +
-+ 	if (!hlist_empty(&stable_node->hlist)) {
-+ 		hlist_for_each_entry_safe(node_vma, n,
-+ 					  &stable_node->hlist, hlist) {
-+ 			hlist_for_each_entry(rmap_item, &node_vma->rmap_hlist, hlist) {
-+ 				uksm_pages_sharing--;
++	if (!hlist_empty(&stable_node->hlist)) {
++		hlist_for_each_entry_safe(node_vma, n,
++					  &stable_node->hlist, hlist) {
++			hlist_for_each_entry(rmap_item, &node_vma->rmap_hlist, hlist) {
++				uksm_pages_sharing--;
 +
-+ 				uksm_drop_anon_vma(rmap_item);
-+ 				rmap_item-> 地址 &= PAGE_MASK;
-+ 			}
-+ 			free_node_vma(node_vma);
-+ 			cond_resched();
-+ 		}
++				uksm_drop_anon_vma(rmap_item);
++				rmap_item->address &= PAGE_MASK;
++			}
++			free_node_vma(node_vma);
++			cond_resched();
++		}
 +
-+ 		/* 最后一个算共享 */
-+ 		uksm_pages_shared--;
-+ 		uksm_pages_sharing++；
-+ 	}
++		/* the last one is counted as shared */
++		uksm_pages_shared--;
++		uksm_pages_sharing++;
++	}
 +
-+ 	if (stable_node->tree_node && unlink_rb) {
-+ 		rb_erase(&stable_node->node,
-+ 			 &stable_node->tree_node->sub_root);
++	if (stable_node->tree_node && unlink_rb) {
++		rb_erase(&stable_node->node,
++			 &stable_node->tree_node->sub_root);
 +
-+ 		if (RB_EMPTY_ROOT(&stable_node->tree_node->sub_root) &&
-+ 		    remove_tree_node) {
-+ 			rb_erase(&stable_node->tree_node->node,
-+ 				 root_stable_treep);
-+ 			free_tree_node(stable_node->tree_node);
-+ 		} 其他 {
-+ 			stable_node->tree_node->count--;
-+ 		}
-+ 	}
++		if (RB_EMPTY_ROOT(&stable_node->tree_node->sub_root) &&
++		    remove_tree_node) {
++			rb_erase(&stable_node->tree_node->node,
++				 root_stable_treep);
++			free_tree_node(stable_node->tree_node);
++		} else {
++			stable_node->tree_node->count--;
++		}
++	}
 +
-+ 	free_stable_node(stable_node);
-+ }
++	free_stable_node(stable_node);
++}
 +
 +
-+ /*
-+ * get_uksm_page: 检查稳定节点指示的页面
++/*
++ * get_uksm_page: checks if the page indicated by the stable node
 + * is still its ksm page, despite having held no reference to it.
 + * In which case we can trust the content of the page, and it
 + * returns the gotten page; but if the page has now been zapped,
@@ -2447,182 +2447,182 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	struct mm_struct *mm;
 +	struct rw_semaphore *sem;
 +
-+ 	spin_lock(&vma_slot_list_lock);
++	spin_lock(&vma_slot_list_lock);
 +
-+ 	/* slot_list 被删除并从新列表中初始化，当它进入时
-+ 	 * uksm_list。如果现在它不为空，则必须将其移至 del list
-+ 	 */
-+	如果 (!slot_in_uksm(slot)) {
-+ 		spin_unlock(&vma_slot_list_lock);
-+		返回 -ENOENT;
-+ 	}
++	/* the slot_list was removed and inited from new list, when it enters
++	 * uksm_list. If now it's not empty, then it must be moved to del list
++	 */
++	if (!slot_in_uksm(slot)) {
++		spin_unlock(&vma_slot_list_lock);
++		return -ENOENT;
++	}
 +
-+ 	BUG_ON(slot->pages != vma_pages(slot->vma));
-+ 	/* 好的，vma 仍然有效 */
-+ 	vma = 插槽-> vma;
-+ 	mm = vma->vm_mm;
-+ 	sem = &mm->mmap_sem;
++	BUG_ON(slot->pages != vma_pages(slot->vma));
++	/* Ok, vma still valid */
++	vma = slot->vma;
++	mm = vma->vm_mm;
++	sem = &mm->mmap_sem;
 +
-+	如果 (uksm_test_exit(mm)) {
-+ 		spin_unlock(&vma_slot_list_lock);
-+		返回 -ENOENT;
-+ 	}
++	if (uksm_test_exit(mm)) {
++		spin_unlock(&vma_slot_list_lock);
++		return -ENOENT;
++	}
 +
-+ 	if (down_read_trylock(sem)) {
-+ 		spin_unlock(&vma_slot_list_lock);
-+ 		if (slot_pool_alloc(slot)) {
-+ 			uksm_remove_vma(vma);
-+ 			up_read(sem);
-+			返回 -ENOENT;
-+ 		}
-+		返回 0；
-+ 	}
++	if (down_read_trylock(sem)) {
++		spin_unlock(&vma_slot_list_lock);
++		if (slot_pool_alloc(slot)) {
++			uksm_remove_vma(vma);
++			up_read(sem);
++			return -ENOENT;
++		}
++		return 0;
++	}
 +
-+ 	spin_unlock(&vma_slot_list_lock);
-+	返回 -EBUSY;
-+ }
++	spin_unlock(&vma_slot_list_lock);
++	return -EBUSY;
++}
 +
-+静态内联无符号长
-+ vma_page_address(struct page *page, struct vm_area_struct *vma)
-+ {
-+ 	pgoff_t pgoff = 页->索引；
-+	无符号长地址；
++static inline unsigned long
++vma_page_address(struct page *page, struct vm_area_struct *vma)
++{
++	pgoff_t pgoff = page->index;
++	unsigned long address;
 +
-+	地址 = vma->vm_start + ((pgoff - vma->vm_pgoff) << PAGE_SHIFT);
-+	如果（不太可能（地址 < vma->vm_start || 地址 >= vma->vm_end））{
-+ 		/* 页面应该在@vma 映射范围内 */
-+		返回 -EFAULT;
-+ 	}
-+	退货地址；
-+ }
++	address = vma->vm_start + ((pgoff - vma->vm_pgoff) << PAGE_SHIFT);
++	if (unlikely(address < vma->vm_start || address >= vma->vm_end)) {
++		/* page should be within @vma mapping range */
++		return -EFAULT;
++	}
++	return address;
++}
 +
 +
-+ /* 成功返回 0 并且项目的 mmap_sem 被锁定 */
-+静态内联 int get_mergeable_page_lock_mmap(struct rmap_item *item)
-+ {
-+ 	struct mm_struct *mm;
-+ 	struct vma_slot *slot = item->slot;
-+ 内部	错误 = -EINVAL;
++/* return 0 on success with the item's mmap_sem locked */
++static inline int get_mergeable_page_lock_mmap(struct rmap_item *item)
++{
++	struct mm_struct *mm;
++	struct vma_slot *slot = item->slot;
++	int err = -EINVAL;
 +
-+ 	struct page *page;
++	struct page *page;
 +
-+ 	/*
-+ 	 * try_down_read_slot_mmap_sem() 返回非零，如果插槽
-+ 	 * 已被 uksm_remove_vma() 删除。
-+ 	 */
-+ 	if (try_down_read_slot_mmap_sem(slot))
-+		返回 -EBUSY;
++	/*
++	 * try_down_read_slot_mmap_sem() returns non-zero if the slot
++	 * has been removed by uksm_remove_vma().
++	 */
++	if (try_down_read_slot_mmap_sem(slot))
++		return -EBUSY;
 +
-+ 	mm = slot->vma->vm_mm;
++	mm = slot->vma->vm_mm;
 +
-+ 	if (uksm_test_exit(mm))
-+		转到 failout_up；
++	if (uksm_test_exit(mm))
++		goto failout_up;
 +
-+	页面 = 项目->页面；
-+ 	rcu_read_lock();
-+ 	if (!get_page_unless_zero(page)) {
-+ 		rcu_read_unlock();
-+		转到 failout_up；
-+ 	}
++	page = item->page;
++	rcu_read_lock();
++	if (!get_page_unless_zero(page)) {
++		rcu_read_unlock();
++		goto failout_up;
++	}
 +
-+ 	/* 这里不需要考虑大页面。*/
-+ 	if (item->slot->vma->anon_vma != page_anon_vma(page) ||
-+ 	    vma_page_address(page, item->slot->vma) != get_rmap_addr(item)) {
-+ 		/*
-+ 		 * 待办事项：
-+ 		 * 我们是否应该发布这个项目，因为它的页面陈旧
-+ 		 * 映射？
-+ 		 */
-+ 		put_page（页面）；
-+ 		rcu_read_unlock();
-+		转到 failout_up；
-+ 	}
-+ 	rcu_read_unlock();
-+	返回 0；
++	/* No need to consider huge page here. */
++	if (item->slot->vma->anon_vma != page_anon_vma(page) ||
++	    vma_page_address(page, item->slot->vma) != get_rmap_addr(item)) {
++		/*
++		 * TODO:
++		 * should we release this item becase of its stale page
++		 * mapping?
++		 */
++		put_page(page);
++		rcu_read_unlock();
++		goto failout_up;
++	}
++	rcu_read_unlock();
++	return 0;
 +
-+ failout_up：
-+ 	up_read(&mm->mmap_sem);
-+	返回错误；
-+ }
++failout_up:
++	up_read(&mm->mmap_sem);
++	return err;
++}
 +
-+ /*
-+ * 什么样的 VMA 被考虑？
++/*
++ * What kind of VMA is considered ?
 + */
-+静态内联 int vma_can_enter(struct vm_area_struct *vma)
-+ {
-+	返回 uksm_flags_can_scan(vma->vm_flags);
-+ }
++static inline int vma_can_enter(struct vm_area_struct *vma)
++{
++	return uksm_flags_can_scan(vma->vm_flags);
++}
 +
-+ /*
-+ * 每当创建新的 vma 时调用新的 vma_slot。
-+ * 被创建并插入到全局列表中 必须被调用。
-+ * 在 vma 插入到它的 mm 之后。
++/*
++ * Called whenever a fresh new vma is created A new vma_slot.
++ * is created and inserted into a global list Must be called.
++ * after vma is inserted to its mm.
 + */
-+ void uksm_vma_add_new(struct vm_area_struct *vma)
-+ {
-+ 	struct vma_slot *slot;
++void uksm_vma_add_new(struct vm_area_struct *vma)
++{
++	struct vma_slot *slot;
 +
-+	如果 (!vma_can_enter(vma)) {
-+ 		vma->uksm_vma_slot = NULL;
-+		返回；
-+ 	}
++	if (!vma_can_enter(vma)) {
++		vma->uksm_vma_slot = NULL;
++		return;
++	}
 +
-+	插槽 = alloc_vma_slot();
-+	如果（！槽）{
-+ 		vma->uksm_vma_slot = NULL;
-+		返回；
-+ 	}
++	slot = alloc_vma_slot();
++	if (!slot) {
++		vma->uksm_vma_slot = NULL;
++		return;
++	}
 +
-+ 	vma->uksm_vma_slot = 插槽；
-+ 	vma->vm_flags |= VM_MERGEABLE;
-+	插槽-> vma = vma;
-+ 	slot->mm = vma->vm_mm;
-+ 	slot->ctime_j = jiffies;
-+ 	slot->pages = vma_pages(vma);
-+ 	spin_lock(&vma_slot_list_lock);
-+ 	list_add_tail(&slot->slot_list, &vma_slot_new);
-+ 	spin_unlock(&vma_slot_list_lock);
-+ }
++	vma->uksm_vma_slot = slot;
++	vma->vm_flags |= VM_MERGEABLE;
++	slot->vma = vma;
++	slot->mm = vma->vm_mm;
++	slot->ctime_j = jiffies;
++	slot->pages = vma_pages(vma);
++	spin_lock(&vma_slot_list_lock);
++	list_add_tail(&slot->slot_list, &vma_slot_new);
++	spin_unlock(&vma_slot_list_lock);
++}
 +
-+ /* 32/3 < 他们 < 32/2 */
-+ #define shiftl 8
-+ #define 移位器 12
++/*   32/3 < they < 32/2 */
++#define shiftl	8
++#define shiftr	12
 +
-+ #define HASH_FROM_TO(from, to) \
-+ for (index = from; index < to; index++) { \
-+ 	pos = random_nums[索引]; \
-+	哈希 += 键 [pos]; \
-+ 	hash += (hash << shiftl); \
-+	哈希 ^= (哈希 >> 移位器); \
-+ }
++#define HASH_FROM_TO(from, to)			\
++for (index = from; index < to; index++) {	\
++	pos = random_nums[index];		\
++	hash += key[pos];			\
++	hash += (hash << shiftl);		\
++	hash ^= (hash >> shiftr);		\
++}
 +
 +
-+ #define HASH_FROM_DOWN_TO(from, to) \
-+ for (index = from - 1; index >= to; index--) { \
-+	哈希 ^= (哈希 >> 移位器); \
-+	哈希 ^= (哈希 >> (shiftr*2)); \
-+ 	hash -= (hash << shiftl); \
-+ 	hash += (hash << (shiftl*2)); \
-+ 	pos = random_nums[索引]; \
-+	哈希 -= 键 [pos]; \
-+ }
++#define HASH_FROM_DOWN_TO(from, to)		\
++for (index = from - 1; index >= to; index--) {	\
++	hash ^= (hash >> shiftr);		\
++	hash ^= (hash >> (shiftr*2));		\
++	hash -= (hash << shiftl);		\
++	hash += (hash << (shiftl*2));		\
++	pos = random_nums[index];		\
++	hash -= key[pos];			\
++}
 +
-+ /*
-+ * 主要的随机样本哈希函数。
++/*
++ * The main random sample hash function.
 + */
-+静态 u32 random_sample_hash(void *addr, u32 hash_strength)
-+ {
-+ 	u32 哈希 = 0xdeadbeef；
-+ 	int index, pos, loop = hash_strength;
-+ 	u32 *key = (u32 *)addr;
++static u32 random_sample_hash(void *addr, u32 hash_strength)
++{
++	u32 hash = 0xdeadbeef;
++	int index, pos, loop = hash_strength;
++	u32 *key = (u32 *)addr;
 +
-+	如果（循环 > HASH_STRENGTH_FULL）
-+		循环 = HASH_STRENGTH_FULL;
++	if (loop > HASH_STRENGTH_FULL)
++		loop = HASH_STRENGTH_FULL;
 +
-+ 	HASH_FROM_TO（0，循环）；
++	HASH_FROM_TO(0, loop);
 +
-+	如果（hash_strength > HASH_STRENGTH_FULL）{
-+		循环 = hash_strength - HASH_STRENGTH_FULL;
++	if (hash_strength > HASH_STRENGTH_FULL) {
++		loop = hash_strength - HASH_STRENGTH_FULL;
 +		HASH_FROM_TO(0, loop);
 +	}
 +
@@ -2765,83 +2765,83 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	return val;
 +}
 +
-+ static int memcmp_pages_with_cost(struct page *page1, struct page *page2,
-+ 			int cost_accounting)
-+ {
-+	字符 *addr1, *addr2;
-+ 	int ret;
++static int memcmp_pages_with_cost(struct page *page1, struct page *page2,
++			int cost_accounting)
++{
++	char *addr1, *addr2;
++	int ret;
 +
-+ 	addr1 = kmap_atomic(page1);
-+ 	addr2 = kmap_atomic(page2);
-+ 	ret = memcmp(addr1, addr2, PAGE_SIZE);
-+ 	kunmap_atomic(addr2);
-+ 	kunmap_atomic(addr1);
++	addr1 = kmap_atomic(page1);
++	addr2 = kmap_atomic(page2);
++	ret = memcmp(addr1, addr2, PAGE_SIZE);
++	kunmap_atomic(addr2);
++	kunmap_atomic(addr1);
 +
-+ 	if (cost_accounting)
-+ 		inc_rshash_neg(memcmp_cost);
++	if (cost_accounting)
++		inc_rshash_neg(memcmp_cost);
 +
-+	返回 ret;
-+ }
++	return ret;
++}
 +
-+静态内联 int pages_identical_with_cost(struct page *page1, struct page *page2)
-+ {
-+	返回 !memcmp_pages_with_cost(page1, page2, 0);
-+ }
++static inline int pages_identical_with_cost(struct page *page1, struct page *page2)
++{
++	return !memcmp_pages_with_cost(page1, page2, 0);
++}
 +
-+静态内联 int is_page_full_zero(struct page *page)
-+ {
-+	字符 *地址；
-+ 	int ret;
++static inline int is_page_full_zero(struct page *page)
++{
++	char *addr;
++	int ret;
 +
-+ 	addr = kmap_atomic(page);
-+ 	ret = is_full_zero(addr, PAGE_SIZE);
-+ 	kunmap_atomic（地址）；
++	addr = kmap_atomic(page);
++	ret = is_full_zero(addr, PAGE_SIZE);
++	kunmap_atomic(addr);
 +
-+	返回 ret;
-+ }
++	return ret;
++}
 +
-+ static int write_protect_page(struct vm_area_struct *vma, struct page *page,
-+ 			      pte_t *orig_pte, pte_t *old_pte)
-+ {
-+ 	struct mm_struct *mm = vma->vm_mm;
-+ 	struct page_vma_mapped_walk pvmw = {
-+ 		.page = 页，
-+ 		.vma = vma，
-+ 	};
-+        struct mmu_notifier_range 范围；
-+ 	int 交换；
-+ 内部	错误 = -EFAULT;
++static int write_protect_page(struct vm_area_struct *vma, struct page *page,
++			      pte_t *orig_pte, pte_t *old_pte)
++{
++	struct mm_struct *mm = vma->vm_mm;
++	struct page_vma_mapped_walk pvmw = {
++		.page = page,
++		.vma = vma,
++	};
++       struct mmu_notifier_range range;
++	int swapped;
++	int err = -EFAULT;
 +
-+ 	pvmw.address = page_address_in_vma(page, vma);
-+ 	if (pvmw.address == -EFAULT)
-+		出去；
++	pvmw.address = page_address_in_vma(page, vma);
++	if (pvmw.address == -EFAULT)
++		goto out;
 +
-+ 	BUG_ON(PageTransCompound(page));
++	BUG_ON(PageTransCompound(page));
 +
-+         mmu_notifier_range_init(&range, MMU_NOTIFY_CLEAR, 0, vma, mm, pvmw.address,
-+                                 pvmw.address + PAGE_SIZE);
-+ 	mmu_notifier_invalidate_range_start(&range);
++        mmu_notifier_range_init(&range, MMU_NOTIFY_CLEAR, 0, vma, mm, pvmw.address,
++                                pvmw.address + PAGE_SIZE);
++	mmu_notifier_invalidate_range_start(&range);
 +
-+ 	if (!page_vma_mapped_walk(&pvmw))
-+		转到 out_mn;
-+ 	if (WARN_ONCE(!pvmw.pte, "意外的 PMD 映射？"))
-+		转到 out_unlock；
++	if (!page_vma_mapped_walk(&pvmw))
++		goto out_mn;
++	if (WARN_ONCE(!pvmw.pte, "Unexpected PMD mapping?"))
++		goto out_unlock;
 +
-+ 	if (old_pte)
-+ 		*old_pte = *pvmw.pte;
++	if (old_pte)
++		*old_pte = *pvmw.pte;
 +
-+ 	if (pte_write(*pvmw.pte) || pte_dirty(*pvmw.pte) ||
-+ 	    (pte_protnone(*pvmw.pte) && pte_savedwrite(*pvmw.pte)) || mm_tlb_flush_pending(mm)) {
-+ 		pte_t 条目；
++	if (pte_write(*pvmw.pte) || pte_dirty(*pvmw.pte) ||
++	    (pte_protnone(*pvmw.pte) && pte_savedwrite(*pvmw.pte)) || mm_tlb_flush_pending(mm)) {
++		pte_t entry;
 +
-+		交换 = PageSwapCache(page);
-+ 		flush_cache_page(vma, pvmw.address, page_to_pfn(page));
-+ 		/*
-+ 		 * 好的，这很棘手，当 get_user_pages_fast() 运行时它不会
-+ 		 * 采取任何锁定，因此我们将要进行的检查
-+ 		 * 与 mapcount 相对的 pagecount 是快速的和
-+ 		 * O_DIRECT 可以在检查后立即发生。
-+ 		 * 所以我们在检查之前清除 pte 并刷新 tlb
++		swapped = PageSwapCache(page);
++		flush_cache_page(vma, pvmw.address, page_to_pfn(page));
++		/*
++		 * Ok this is tricky, when get_user_pages_fast() run it doesn't
++		 * take any lock, therefore the check that we are going to make
++		 * with the pagecount against the mapcount is racey and
++		 * O_DIRECT can happen right after the check.
++		 * So we clear the pte and flush the tlb before the check
 +		 * this assure us that no O_DIRECT can happen after the check
 +		 * or in the middle of the check.
 +		 */
@@ -3015,82 +3015,82 @@ diff --git a/mm/memory.cb/mm/memory.c
 +
 +		if (rmap_item->hash_max == page_hash_max(page, hash))
 +			err = MERGE_ERR_COLLI;
-+		其他
-+			错误 = MERGE_ERR_CHANGED;
-+ 	} 其他 {
-+ 		inc_rshash_neg(memcmp_cost + hash_strength);
++		else
++			err = MERGE_ERR_CHANGED;
++	} else {
++		inc_rshash_neg(memcmp_cost + hash_strength);
 +
-+ 		if (page_hash(page, hash_strength, 0) == hash)
-+			错误 = MERGE_ERR_COLLI;
-+		其他
-+			错误 = MERGE_ERR_CHANGED;
-+ 	}
++		if (page_hash(page, hash_strength, 0) == hash)
++			err = MERGE_ERR_COLLI;
++		else
++			err = MERGE_ERR_CHANGED;
++	}
 +
-+	返回错误；
-+ }
++	return err;
++}
 +
-+ /**
-+ * 尝试将 rmap_item.page 与稳定节点中的 kpage 合并。kpage必须
-+ * 已经是一个 ksm 页面。
++/**
++ * Try to merge a rmap_item.page with a kpage in stable node. kpage must
++ * already be a ksm page.
 + *
-+ * @return 0 如果页面被合并，否则 -EFAULT。
++ * @return 0 if the pages were merged, -EFAULT otherwise.
 + */
-+静态 int try_to_merge_with_uksm_page(struct rmap_item *rmap_item,
-+ 				      struct page *kpage, u32 hash)
-+ {
-+ 	struct vm_area_struct *vma = rmap_item->slot->vma;
-+ 	struct mm_struct *mm = vma->vm_mm;
-+ 	pte_t orig_pte = __pte(0);
-+ 内部	错误 = MERGE_ERR_PGERR;
-+ 	struct page *page;
++static int try_to_merge_with_uksm_page(struct rmap_item *rmap_item,
++				      struct page *kpage, u32 hash)
++{
++	struct vm_area_struct *vma = rmap_item->slot->vma;
++	struct mm_struct *mm = vma->vm_mm;
++	pte_t orig_pte = __pte(0);
++	int err = MERGE_ERR_PGERR;
++	struct page *page;
 +
-+ 	if (uksm_test_exit(mm))
-+		出去；
++	if (uksm_test_exit(mm))
++		goto out;
 +
-+	页面 = rmap_item->页面；
++	page = rmap_item->page;
 +
-+ 	if (page == kpage) { /* ksm 页面分叉 */
-+		错误 = 0;
-+		出去；
-+ 	}
++	if (page == kpage) { /* ksm page forked */
++		err = 0;
++		goto out;
++	}
 +
-+ 	/*
-+ 	 * 我们需要页面锁来读取一个稳定的 PageSwapCache
-+ 	 * write_protect_page()。我们使用 trylock_page() 而不是
-+ 	 * lock_page() 因为我们不想在这里等待 - 我们
-+ 	 * 更喜欢继续扫描和合并不同的页面，
-+ 	 * 然后在解锁后返回此页面。
-+ 	 */
-+ 	if (!trylock_page(page))
-+		出去；
++	/*
++	 * We need the page lock to read a stable PageSwapCache in
++	 * write_protect_page().  We use trylock_page() instead of
++	 * lock_page() because we don't want to wait here - we
++	 * prefer to continue scanning and merging different pages,
++	 * then come back to this page when it is unlocked.
++	 */
++	if (!trylock_page(page))
++		goto out;
 +
-+ 	if (!PageAnon(page) || !PageKsm(kpage))
-+		转到 out_unlock；
++	if (!PageAnon(page) || !PageKsm(kpage))
++		goto out_unlock;
 +
-+ 	if (PageTransCompound(page)) {
-+		错误 = split_huge_page(page);
-+		如果（错误）
-+			转到 out_unlock；
-+ 	}
++	if (PageTransCompound(page)) {
++		err = split_huge_page(page);
++		if (err)
++			goto out_unlock;
++	}
 +
-+ 	/*
-+ 	 * 如果这个匿名页面只映射到这里，它的 pte 可能需要
-+ 	 * 被写保护。如果它被映射到其他地方，它的所有
-+ 	 * ptes 必须已经写保护。但无论是在
-+ 	 * 的情况下，我们需要锁定并检查 page_count 没有提高。
-+ 	 */
-+ 	if (write_protect_page(vma, page, &orig_pte, NULL) == 0) {
-+ 		if (pages_identical_with_cost(page, kpage))
-+ 			err = replace_page(vma, page, kpage, orig_pte);
-+		其他
-+ 			err = check_collision(rmap_item, hash);
-+ 	}
++	/*
++	 * If this anonymous page is mapped only here, its pte may need
++	 * to be write-protected.  If it's mapped elsewhere, all of its
++	 * ptes are necessarily already write-protected.  But in either
++	 * case, we need to lock and check page_count is not raised.
++	 */
++	if (write_protect_page(vma, page, &orig_pte, NULL) == 0) {
++		if (pages_identical_with_cost(page, kpage))
++			err = replace_page(vma, page, kpage, orig_pte);
++		else
++			err = check_collision(rmap_item, hash);
++	}
 +
-+ 	if ((vma->vm_flags & VM_LOCKED) && kpage && !err) {
-+ 		munlock_vma_page（页面）；
-+ 		if (!PageMlocked(kpage)) {
-+			解锁页面（页面）；
-+ 			lock_page(kpage);
++	if ((vma->vm_flags & VM_LOCKED) && kpage && !err) {
++		munlock_vma_page(page);
++		if (!PageMlocked(kpage)) {
++			unlock_page(page);
++			lock_page(kpage);
 +			mlock_vma_page(kpage);
 +			page = kpage;		/* for final unlock */
 +		}
@@ -3211,74 +3211,74 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	 */
 +	saved_mapping = page->mapping;
 +	set_page_stable_node(page, NULL);
-+ 	mark_page_accessed(page);
-+ 	if (!PageDirty(page))
-+ 		SetPageDirty（页面）；
++	mark_page_accessed(page);
++	if (!PageDirty(page))
++		SetPageDirty(page);
 +
-+	解锁页面（页面）；
++	unlock_page(page);
 +
-+ 	if (!trylock_page(tree_page))
-+		转到 restore_out；
++	if (!trylock_page(tree_page))
++		goto restore_out;
 +
-+	如果 (!PageAnon(tree_page)) {
-+		解锁页面（树页面）；
-+		转到 restore_out；
-+ 	}
++	if (!PageAnon(tree_page)) {
++		unlock_page(tree_page);
++		goto restore_out;
++	}
 +
-+ 	if (PageTransCompound(tree_page)) {
-+		错误 = split_huge_page(tree_page);
-+		如果（错误）{
-+			解锁页面（树页面）；
-+			转到 restore_out；
-+ 		}
-+ 	}
++	if (PageTransCompound(tree_page)) {
++		err = split_huge_page(tree_page);
++		if (err) {
++			unlock_page(tree_page);
++			goto restore_out;
++		}
++	}
 +
-+ 	if (write_protect_page(vma2, tree_page, &wprt_pte2, &orig_pte2) != 0) {
-+		解锁页面（树页面）；
-+		转到 restore_out；
-+ 	}
++	if (write_protect_page(vma2, tree_page, &wprt_pte2, &orig_pte2) != 0) {
++		unlock_page(tree_page);
++		goto restore_out;
++	}
 +
-+ 	if (pages_identical_with_cost(page, tree_page)) {
-+ 		err = replace_page(vma2, tree_page, page, wprt_pte2);
-+		如果（错误）{
-+			解锁页面（树页面）；
-+			转到 restore_out；
-+ 		}
++	if (pages_identical_with_cost(page, tree_page)) {
++		err = replace_page(vma2, tree_page, page, wprt_pte2);
++		if (err) {
++			unlock_page(tree_page);
++			goto restore_out;
++		}
 +
-+ 		if ((vma2->vm_flags & VM_LOCKED)) {
-+ 			munlock_vma_page(tree_page);
-+ 			if (!PageMlocked(page)) {
-+				解锁页面（树页面）；
-+				锁页（页）；
-+ 				mlock_vma_page（页面）；
-+ 				tree_page = 页面；/* 最终解锁 */
-+ 			}
-+ 		}
++		if ((vma2->vm_flags & VM_LOCKED)) {
++			munlock_vma_page(tree_page);
++			if (!PageMlocked(page)) {
++				unlock_page(tree_page);
++				lock_page(page);
++				mlock_vma_page(page);
++				tree_page = page; /* for final unlock */
++			}
++		}
 +
-+		解锁页面（树页面）；
++		unlock_page(tree_page);
 +
-+		出去；/* 成功 */
++		goto out; /* success */
 +
-+ 	} 其他 {
-+ 		if (tree_rmap_item->hash_max &&
-+ 		    tree_rmap_item->hash_max == rmap_item->hash_max) {
-+			错误 = MERGE_ERR_COLLI_MAX;
-+ 		} else if (page_hash(page, hash_strength, 0) ==
-+ 		    page_hash(tree_page, hash_strength, 0)) {
-+ 			inc_rshash_neg(memcmp_cost + hash_strength * 2);
-+			错误 = MERGE_ERR_COLLI;
-+ 		} 其他 {
-+			错误 = MERGE_ERR_CHANGED;
-+ 		}
++	} else {
++		if (tree_rmap_item->hash_max &&
++		    tree_rmap_item->hash_max == rmap_item->hash_max) {
++			err = MERGE_ERR_COLLI_MAX;
++		} else if (page_hash(page, hash_strength, 0) ==
++		    page_hash(tree_page, hash_strength, 0)) {
++			inc_rshash_neg(memcmp_cost + hash_strength * 2);
++			err = MERGE_ERR_COLLI;
++		} else {
++			err = MERGE_ERR_CHANGED;
++		}
 +
-+		解锁页面（树页面）；
-+ 	}
++		unlock_page(tree_page);
++	}
 +
-+恢复输出：
-+	锁页（页）；
-+	如果 (!restore_uksm_page_pte(vma1, get_rmap_addr(rmap_item),
-+ 				  orig_pte1, wprt_pte1))
-+		页面->映射 = saved_mapping;
++restore_out:
++	lock_page(page);
++	if (!restore_uksm_page_pte(vma1, get_rmap_addr(rmap_item),
++				  orig_pte1, wprt_pte1))
++		page->mapping = saved_mapping;
 +
 +out_unlock:
 +	unlock_page(page);
@@ -3371,183 +3371,183 @@ diff --git a/mm/memory.cb/mm/memory.c
 +	 */
 +	node = tree_node->sub_root.rb_node;
 +	BUG_ON(!node);
-+ 	hash_max = rmap_item_hash_max(item, hash);
++	hash_max = rmap_item_hash_max(item, hash);
 +
-+	同时（节点）{
-+ 		int cmp;
++	while (node) {
++		int cmp;
 +
-+ 		stable_node = rb_entry(node, struct stable_node, node);
++		stable_node = rb_entry(node, struct stable_node, node);
 +
-+ 		cmp = hash_cmp(hash_max, stable_node->hash_max);
++		cmp = hash_cmp(hash_max, stable_node->hash_max);
 +
-+		如果 (cmp < 0)
-+			节点 = 节点->rb_left;
-+		否则如果 (cmp > 0)
-+			节点 = 节点->rb_right;
-+		其他
-+			转到 get_page_out;
-+ 	}
++		if (cmp < 0)
++			node = node->rb_left;
++		else if (cmp > 0)
++			node = node->rb_right;
++		else
++			goto get_page_out;
++	}
 +
-+	返回空；
++	return NULL;
 +
-+ get_page_out：
-+ 	page = get_uksm_page(stable_node, 1, 1);
-+	返回页；
-+ }
++get_page_out:
++	page = get_uksm_page(stable_node, 1, 1);
++	return page;
++}
 +
-+静态 int try_merge_rmap_item(struct rmap_item *item,
-+			       结构页 *kpage，
-+			       结构页 *tree_page)
-+ {
-+ 	struct vm_area_struct *vma = item->slot->vma;
-+ 	struct page_vma_mapped_walk pvmw = {
-+ 		.page = kpage,
-+ 		.vma = vma，
-+ 	};
++static int try_merge_rmap_item(struct rmap_item *item,
++			       struct page *kpage,
++			       struct page *tree_page)
++{
++	struct vm_area_struct *vma = item->slot->vma;
++	struct page_vma_mapped_walk pvmw = {
++		.page = kpage,
++		.vma = vma,
++	};
 +
-+ 	pvmw.address = get_rmap_addr(item);
-+ 	if (!page_vma_mapped_walk(&pvmw))
-+		返回 0；
++	pvmw.address = get_rmap_addr(item);
++	if (!page_vma_mapped_walk(&pvmw))
++		return 0;
 +
-+ 	if (pte_write(*pvmw.pte)) {
-+ 		/* 已更改，中止！*/
-+ 		page_vma_mapped_walk_done(&pvmw);
-+		返回 0；
-+ 	}
++	if (pte_write(*pvmw.pte)) {
++		/* has changed, abort! */
++		page_vma_mapped_walk_done(&pvmw);
++		return 0;
++	}
 +
-+ 	get_page(tree_page);
-+ 	page_add_anon_rmap(tree_page, vma, pvmw.address, false);
++	get_page(tree_page);
++	page_add_anon_rmap(tree_page, vma, pvmw.address, false);
 +
-+ 	flush_cache_page(vma, pvmw.address, page_to_pfn(kpage));
-+ 	ptep_clear_flush_notify(vma, pvmw.address, pvmw.pte);
-+ 	set_pte_at_notify(vma->vm_mm, pvmw.address, pvmw.pte,
-+ 			  mk_pte(tree_page, vma->vm_page_prot));
++	flush_cache_page(vma, pvmw.address, page_to_pfn(kpage));
++	ptep_clear_flush_notify(vma, pvmw.address, pvmw.pte);
++	set_pte_at_notify(vma->vm_mm, pvmw.address, pvmw.pte,
++			  mk_pte(tree_page, vma->vm_page_prot));
 +
-+ 	page_remove_rmap(kpage, false);
-+ 	put_page(kpage);
++	page_remove_rmap(kpage, false);
++	put_page(kpage);
 +
-+ 	page_vma_mapped_walk_done(&pvmw);
++	page_vma_mapped_walk_done(&pvmw);
 +
-+	返回 1；
-+ }
++	return 1;
++}
 +
-+ /**
-+ * try_to_merge_with_stable_page() - 当需要插入两个 rmap_items 时
-+ * 进入稳定树，发现该页面与稳定的 ksm 页面相同，
-+ * 这是我们将它们合二为一的最后机会。
++/**
++ * try_to_merge_with_stable_page() - when two rmap_items need to be inserted
++ * into stable tree, the page was found to be identical to a stable ksm page,
++ * this is the last chance we can merge them into one.
 + *
-+ * @item1: 保存我们想要插入的页面的 rmap_item
-+ * 进入稳定树。
-+ * @item2: 不稳定树搜索时我们发现的另一个 rmap_item
-+ * @oldpage：两个rmap_items当前映射的页面
-+ * @tree_page：我们在稳定树节点中找到的相同页面
-+ * @success1: 如果 item1 合并成功则返回
-+ * @success2: 如果 item2 合并成功则返回
++ * @item1:	the rmap_item holding the page which we wanted to insert
++ *		into stable tree.
++ * @item2:	the other rmap_item we found when unstable tree search
++ * @oldpage:	the page currently mapped by the two rmap_items
++ * @tree_page:	the page we found identical in stable tree node
++ * @success1:	return if item1 is successfully merged
++ * @success2:	return if item2 is successfully merged
 + */
-+静态无效 try_merge_with_stable(struct rmap_item *item1,
-+ 				  struct rmap_item *item2,
-+				  结构页 **kpage,
-+				  结构页 *tree_page，
-+ 				  int *success1, int *success2)
-+ {
-+ 	struct vm_area_struct *vma1 = item1->slot->vma;
-+ 	struct vm_area_struct *vma2 = item2->slot->vma;
-+ 	*成功1 = 0;
-+ 	*成功2 = 0;
++static void try_merge_with_stable(struct rmap_item *item1,
++				  struct rmap_item *item2,
++				  struct page **kpage,
++				  struct page *tree_page,
++				  int *success1, int *success2)
++{
++	struct vm_area_struct *vma1 = item1->slot->vma;
++	struct vm_area_struct *vma2 = item2->slot->vma;
++	*success1 = 0;
++	*success2 = 0;
 +
-+	如果（不太可能（*kpage == tree_page））{
-+ 		/* 我不认为这真的会发生 */
-+ 		pr_warn("UKSM: 在"中检测到意外情况
-+ 			"%s -- *kpage == tree_page !\n", __func__);
-+ 		*成功1 = 1;
-+ 		*成功2 = 1;
-+		返回；
-+ 	}
++	if (unlikely(*kpage == tree_page)) {
++		/* I don't think this can really happen */
++		pr_warn("UKSM: unexpected condition detected in "
++			"%s -- *kpage == tree_page !\n", __func__);
++		*success1 = 1;
++		*success2 = 1;
++		return;
++	}
 +
-+ 	if (!PageAnon(*kpage) || !PageKsm(*kpage))
-+		跳转失败；
++	if (!PageAnon(*kpage) || !PageKsm(*kpage))
++		goto failed;
 +
-+ 	if (!trylock_page(tree_page))
-+		跳转失败；
++	if (!trylock_page(tree_page))
++		goto failed;
 +
-+ 	/* 如果 oldpage 仍然是 ksm 并且仍然指向
-+ 	 * 到正确的位置，并且仍然写保护，
-+ 	 * 我们相信它没有改变，不需要
-+ 	 * memcmp 了。
-+ 	 * 注意，我们不能使用嵌套的 pte 锁，
-+ 	 * 死锁风险。
-+ 	 */
-+ 	if (!try_merge_rmap_item(item1, *kpage, tree_page))
-+		转到解锁失败；
++	/* If the oldpage is still ksm and still pointed
++	 * to in the right place, and still write protected,
++	 * we are confident it's not changed, no need to
++	 * memcmp anymore.
++	 * be ware, we cannot take nested pte locks,
++	 * deadlock risk.
++	 */
++	if (!try_merge_rmap_item(item1, *kpage, tree_page))
++		goto unlock_failed;
 +
-+ 	/* ok，然后v​​ma2，提醒pte1已经设置了*/
-+ 	if (!try_merge_rmap_item(item2, *kpage, tree_page))
-+		转到成功_1；
++	/* ok, then vma2, remind that pte1 already set */
++	if (!try_merge_rmap_item(item2, *kpage, tree_page))
++		goto success_1;
 +
-+ 	*成功2 = 1;
-+成功_1：
-+ 	*成功1 = 1;
++	*success2 = 1;
++success_1:
++	*success1 = 1;
 +
 +
-+ 	if ((*success1 && vma1->vm_flags & VM_LOCKED) ||
-+ 	    (*success2 && vma2->vm_flags & VM_LOCKED)) {
-+ 		munlock_vma_page(*kpage);
-+ 		if (!PageMlocked(tree_page))
-+ 			mlock_vma_page(tree_page);
-+ 	}
++	if ((*success1 && vma1->vm_flags & VM_LOCKED) ||
++	    (*success2 && vma2->vm_flags & VM_LOCKED)) {
++		munlock_vma_page(*kpage);
++		if (!PageMlocked(tree_page))
++			mlock_vma_page(tree_page);
++	}
 +
-+ 	/*
-+ 	 * 我们在调用者中不再需要 oldpage，因此可以打破锁定
-+ 	 * 现在。
-+ 	 */
-+ 	unlock_page(*kpage);
-+ 	*kpage = tree_page; /* 在外面解锁。*/
-+	返回；
++	/*
++	 * We do not need oldpage any more in the caller, so can break the lock
++	 * now.
++	 */
++	unlock_page(*kpage);
++	*kpage = tree_page; /* Get unlocked outside. */
++	return;
 +
-+解锁失败：
-+	解锁页面（树页面）；
-+失败：
-+	返回；
-+ }
++unlock_failed:
++	unlock_page(tree_page);
++failed:
++	return;
++}
 +
-+静态内联 void stable_node_hash_max(struct stable_node *node,
-+ 					 struct page *page, u32 hash)
-+ {
-+ 	u32 hash_max = 节点->hash_max；
++static inline void stable_node_hash_max(struct stable_node *node,
++					 struct page *page, u32 hash)
++{
++	u32 hash_max = node->hash_max;
 +
-+	如果（！hash_max）{
-+ 		hash_max = page_hash_max(page, hash);
-+		节点->hash_max = hash_max;
-+ 	}
-+ }
++	if (!hash_max) {
++		hash_max = page_hash_max(page, hash);
++		node->hash_max = hash_max;
++	}
++}
 +
-+静态内联
-+ struct stable_node *new_stable_node(struct tree_node *tree_node,
-+ 				    struct page *kpage, u32 hash_max)
-+ {
-+ 	struct stable_node *new_stable_node;
++static inline
++struct stable_node *new_stable_node(struct tree_node *tree_node,
++				    struct page *kpage, u32 hash_max)
++{
++	struct stable_node *new_stable_node;
 +
-+ 	new_stable_node = alloc_stable_node();
-+ 	if (!new_stable_node)
-+		返回空；
++	new_stable_node = alloc_stable_node();
++	if (!new_stable_node)
++		return NULL;
 +
-+ 	new_stable_node->kpfn = page_to_pfn(kpage);
-+ 	new_stable_node->hash_max = hash_max;
-+ 	new_stable_node->tree_node = tree_node;
-+ 	set_page_stable_node(kpage, new_stable_node);
++	new_stable_node->kpfn = page_to_pfn(kpage);
++	new_stable_node->hash_max = hash_max;
++	new_stable_node->tree_node = tree_node;
++	set_page_stable_node(kpage, new_stable_node);
 +
-+	返回 new_stable_node;
-+ }
++	return new_stable_node;
++}
 +
-+静态内联
-+ struct stable_node *first_level_insert(struct tree_node *tree_node,
-+ 				       struct rmap_item *rmap_item,
-+ 				       struct rmap_item *tree_rmap_item，
-+ 				       struct page **kpage, u32 hash,
-+ 				       int *success1, int *success2)
-+ {
-+ 	int cmp;
-+	结构页 *tree_page;
++static inline
++struct stable_node *first_level_insert(struct tree_node *tree_node,
++				       struct rmap_item *rmap_item,
++				       struct rmap_item *tree_rmap_item,
++				       struct page **kpage, u32 hash,
++				       int *success1, int *success2)
++{
++	int cmp;
++	struct page *tree_page;
 +	u32 hash_max = 0;
 +	struct stable_node *stable_node, *new_snode;
 +	struct rb_node *parent = NULL, **new;
@@ -3564,205 +3564,205 @@ diff --git a/mm/memory.cb/mm/memory.c
 +					      tree_page, success1, success2);
 +			put_page(tree_page);
 +			if (!*success1 && !*success2)
-+				跳转失败；
++				goto failed;
 +
-+			返回 stable_node；
++			return stable_node;
 +
-+ 		} 其他 {
-+ 			/*
-+ 			 * 第一级碰撞尝试创建一个子树。
-+ 			 * 需要创建一个新节点。
-+ 			 */
-+ 			put_page(tree_page);
++		} else {
++			/*
++			 * collision in first level try to create a subtree.
++			 * A new node need to be created.
++			 */
++			put_page(tree_page);
 +
-+ 			stable_node_hash_max(stable_node, tree_page,
-+ 					     tree_node->hash);
-+ 			hash_max = rmap_item_hash_max(rmap_item, hash);
-+ 			cmp = hash_cmp(hash_max, stable_node->hash_max);
++			stable_node_hash_max(stable_node, tree_page,
++					     tree_node->hash);
++			hash_max = rmap_item_hash_max(rmap_item, hash);
++			cmp = hash_cmp(hash_max, stable_node->hash_max);
 +
-+			父 = &stable_node->node;
-+			如果 (cmp < 0)
-+				新 = &parent->rb_left;
-+			否则如果 (cmp > 0)
-+				新 = &parent->rb_right;
-+			其他
-+				跳转失败；
-+ 		}
++			parent = &stable_node->node;
++			if (cmp < 0)
++				new = &parent->rb_left;
++			else if (cmp > 0)
++				new = &parent->rb_right;
++			else
++				goto failed;
++		}
 +
-+ 	} 其他 {
-+ 		/* 唯一的 stable_node 被删除，我们重用它的 tree_node。
-+ 		 */
-+		父母 = NULL;
-+		新 = &tree_node->sub_root.rb_node;
-+ 	}
++	} else {
++		/* the only stable_node deleted, we reuse its tree_node.
++		 */
++		parent = NULL;
++		new = &tree_node->sub_root.rb_node;
++	}
 +
-+ 	new_snode = new_stable_node(tree_node, *kpage, hash_max);
-+ 	if (!new_snode)
-+		跳转失败；
++	new_snode = new_stable_node(tree_node, *kpage, hash_max);
++	if (!new_snode)
++		goto failed;
 +
-+ 	rb_link_node(&new_snode->node, parent, new);
-+ 	rb_insert_color(&new_snode->node, &tree_node->sub_root);
-+ 	tree_node->count++;
-+ 	*成功1 = *成功2 = 1；
++	rb_link_node(&new_snode->node, parent, new);
++	rb_insert_color(&new_snode->node, &tree_node->sub_root);
++	tree_node->count++;
++	*success1 = *success2 = 1;
 +
-+	返回新节点；
++	return new_snode;
 +
-+失败：
-+	返回空；
-+ }
++failed:
++	return NULL;
++}
 +
-+静态内联
-+ struct stable_node *stable_subtree_insert(struct tree_node *tree_node,
-+ 					  struct rmap_item *rmap_item,
-+ 					  struct rmap_item *tree_rmap_item，
-+ 					  struct page **kpage, u32 hash,
-+ 					  int *success1, int *success2)
-+ {
-+	结构页 *tree_page;
-+ 	u32 hash_max;
-+ 	struct stable_node *stable_node, *new_snode;
-+ 	struct rb_node *parent, **new;
++static inline
++struct stable_node *stable_subtree_insert(struct tree_node *tree_node,
++					  struct rmap_item *rmap_item,
++					  struct rmap_item *tree_rmap_item,
++					  struct page **kpage, u32 hash,
++					  int *success1, int *success2)
++{
++	struct page *tree_page;
++	u32 hash_max;
++	struct stable_node *stable_node, *new_snode;
++	struct rb_node *parent, **new;
 +
-+研究：
-+	父母 = NULL;
-+	新 = &tree_node->sub_root.rb_node;
-+ 	BUG_ON(!*new);
-+ 	hash_max = rmap_item_hash_max(rmap_item, hash);
-+	同时（*新）{
-+ 		int cmp;
++research:
++	parent = NULL;
++	new = &tree_node->sub_root.rb_node;
++	BUG_ON(!*new);
++	hash_max = rmap_item_hash_max(rmap_item, hash);
++	while (*new) {
++		int cmp;
 +
-+ 		stable_node = rb_entry(*new, struct stable_node, node);
++		stable_node = rb_entry(*new, struct stable_node, node);
 +
-+ 		cmp = hash_cmp(hash_max, stable_node->hash_max);
++		cmp = hash_cmp(hash_max, stable_node->hash_max);
 +
-+		如果 (cmp < 0) {
-+			父母 = *新;
-+			新 = &parent->rb_left;
-+ 		} else if (cmp > 0) {
-+			父母 = *新;
-+			新 = &parent->rb_right;
-+ 		} 其他 {
-+ 			tree_page = get_uksm_page(stable_node, 1, 0);
-+			如果（树页面）{
-+ 				cmp = memcmp_pages_with_cost(*kpage, tree_page, 1);
-+				如果 (!cmp) {
-+ 					try_merge_with_stable(rmap_item,
-+ 						tree_rmap_item, kpage,
-+ 						tree_page, success1, success2);
++		if (cmp < 0) {
++			parent = *new;
++			new = &parent->rb_left;
++		} else if (cmp > 0) {
++			parent = *new;
++			new = &parent->rb_right;
++		} else {
++			tree_page = get_uksm_page(stable_node, 1, 0);
++			if (tree_page) {
++				cmp = memcmp_pages_with_cost(*kpage, tree_page, 1);
++				if (!cmp) {
++					try_merge_with_stable(rmap_item,
++						tree_rmap_item, kpage,
++						tree_page, success1, success2);
 +
-+ 					put_page(tree_page);
-+ 					if (!*success1 && !*success2)
-+						跳转失败；
-+ 					/*
-+ 					 * 与稳定版成功合并
-+ 					 * 节点
-+ 					 */
-+					返回 stable_node；
-+ 				} 其他 {
-+ 					put_page(tree_page);
-+					跳转失败；
-+ 				}
-+ 			} 其他 {
-+ 				/*
-+ 				 * 稳定节点可能会被删除，
-+ 				 * 和子树也许
-+ 				 * 重构，不能
-+ 				 * 继续，研究它。
-+ 				 */
-+				如果（树节点->计数）{
-+					转到研究；
-+ 				} 其他 {
-+ 					/* 重用树节点*/
-+					父母 = NULL;
-+					新 = &tree_node->sub_root.rb_node;
-+ 				}
-+ 			}
-+ 		}
-+ 	}
++					put_page(tree_page);
++					if (!*success1 && !*success2)
++						goto failed;
++					/*
++					 * successfully merged with a stable
++					 * node
++					 */
++					return stable_node;
++				} else {
++					put_page(tree_page);
++					goto failed;
++				}
++			} else {
++				/*
++				 * stable node may be deleted,
++				 * and subtree maybe
++				 * restructed, cannot
++				 * continue, research it.
++				 */
++				if (tree_node->count) {
++					goto research;
++				} else {
++					/* reuse the tree node*/
++					parent = NULL;
++					new = &tree_node->sub_root.rb_node;
++				}
++			}
++		}
++	}
 +
-+ 	new_snode = new_stable_node(tree_node, *kpage, hash_max);
-+ 	if (!new_snode)
-+		跳转失败；
++	new_snode = new_stable_node(tree_node, *kpage, hash_max);
++	if (!new_snode)
++		goto failed;
 +
-+ 	rb_link_node(&new_snode->node, parent, new);
-+ 	rb_insert_color(&new_snode->node, &tree_node->sub_root);
-+ 	tree_node->count++;
-+ 	*成功1 = *成功2 = 1；
++	rb_link_node(&new_snode->node, parent, new);
++	rb_insert_color(&new_snode->node, &tree_node->sub_root);
++	tree_node->count++;
++	*success1 = *success2 = 1;
 +
-+	返回新节点；
++	return new_snode;
 +
-+失败：
-+	返回空；
-+ }
++failed:
++	return NULL;
++}
 +
 +
-+ /**
-+ * stable_tree_insert() - 尝试在不稳定树中插入合并页面
-+ * 稳定树
++/**
++ * stable_tree_insert() - try to insert a merged page in unstable tree to
++ * the stable tree
 + *
-+ * @kpage：需要插入的页面
-+ * @hash：当前页面的哈希值
-+ * @rmap_item: 被扫描的 rmap_item
-+ * @tree_rmap_item: 在不稳定树上找到的 rmap_item
-+ * @success1: 如果 rmap_item 被合并，则返回
-+ * @success2: 如果 tree_rmap_item 被合并则返回
++ * @kpage:		the page need to be inserted
++ * @hash:		the current hash of this page
++ * @rmap_item:		the rmap_item being scanned
++ * @tree_rmap_item:	the rmap_item found on unstable tree
++ * @success1:		return if rmap_item is merged
++ * @success2:		return if tree_rmap_item is merged
 + *
-+ * @return 稳定树上的 stable_node 如果至少有一个
-+ * rmap_item 插入稳定树，NULL
-+ * 否则。
++ * @return		the stable_node on stable tree if at least one
++ *			rmap_item is inserted into stable tree, NULL
++ *			otherwise.
 + */
-+静态结构 stable_node *
-+ stable_tree_insert(struct page **kpage, u32 hash,
-+ 		   struct rmap_item *rmap_item,
-+ 		   struct rmap_item *tree_rmap_item，
-+ 		   int *success1, int *success2)
-+ {
-+ 	struct rb_node **new = &root_stable_treep->rb_node;
-+ 	struct rb_node *parent = NULL;
-+ 	struct stable_node *stable_node;
-+ 	struct tree_node *tree_node;
-+ 	u32 hash_max = 0;
++static struct stable_node *
++stable_tree_insert(struct page **kpage, u32 hash,
++		   struct rmap_item *rmap_item,
++		   struct rmap_item *tree_rmap_item,
++		   int *success1, int *success2)
++{
++	struct rb_node **new = &root_stable_treep->rb_node;
++	struct rb_node *parent = NULL;
++	struct stable_node *stable_node;
++	struct tree_node *tree_node;
++	u32 hash_max = 0;
 +
-+ 	*成功1 = *成功2 = 0；
++	*success1 = *success2 = 0;
 +
-+	同时（*新）{
-+ 		int cmp;
++	while (*new) {
++		int cmp;
 +
-+ 		tree_node = rb_entry(*new, struct tree_node, node);
++		tree_node = rb_entry(*new, struct tree_node, node);
 +
-+ 		cmp = hash_cmp(hash, tree_node->hash);
++		cmp = hash_cmp(hash, tree_node->hash);
 +
-+		如果 (cmp < 0) {
-+			父母 = *新;
-+			新 = &parent->rb_left;
-+ 		} else if (cmp > 0) {
-+			父母 = *新;
-+			新 = &parent->rb_right;
-+ 		} 其他
-+			休息；
-+ 	}
++		if (cmp < 0) {
++			parent = *new;
++			new = &parent->rb_left;
++		} else if (cmp > 0) {
++			parent = *new;
++			new = &parent->rb_right;
++		} else
++			break;
++	}
 +
-+	如果（*新）{
-+ 		if (tree_node->count == 1) {
-+ 			stable_node = first_level_insert(tree_node, rmap_item,
-+ 						tree_rmap_item, kpage,
-+						哈希，成功1，成功2）；
-+ 		} 其他 {
-+ 			stable_node = stable_subtree_insert(tree_node,
-+ 					rmap_item、tree_rmap_item、kpage、
-+					哈希，成功1，成功2）；
-+ 		}
-+ 	} 其他 {
++	if (*new) {
++		if (tree_node->count == 1) {
++			stable_node = first_level_insert(tree_node, rmap_item,
++						tree_rmap_item, kpage,
++						hash, success1, success2);
++		} else {
++			stable_node = stable_subtree_insert(tree_node,
++					rmap_item, tree_rmap_item, kpage,
++					hash, success1, success2);
++		}
++	} else {
 +
-+ 		/* 没有找到树节点 */
-+ 		tree_node = alloc_tree_node(stable_tree_node_listp);
-+		如果（！树节点）{
-+ 			stable_node = NULL;
-+			出去；
-+ 		}
++		/* no tree node found */
++		tree_node = alloc_tree_node(stable_tree_node_listp);
++		if (!tree_node) {
++			stable_node = NULL;
++			goto out;
++		}
 +
-+ 		stable_node = new_stable_node(tree_node, *kpage, hash_max);
-+		如果（！稳定节点）{
++		stable_node = new_stable_node(tree_node, *kpage, hash_max);
++		if (!stable_node) {
 +			free_tree_node(tree_node);
 +			goto out;
 +		}
@@ -4103,88 +4103,88 @@ diff --git a/mm/memory.cb/mm/memory.c
 +
 +		delta = uksm_pages_scanned >> pages_scanned_base;
 +
-+ 		if (CAN_OVERFLOW_U64(pages_scanned_stored, delta)) {
-+ 			pages_scanned_stored >>= 1;
-+			增量 >>= 1;
-+ 			pages_scanned_base++；
-+ 		}
++		if (CAN_OVERFLOW_U64(pages_scanned_stored, delta)) {
++			pages_scanned_stored >>= 1;
++			delta >>= 1;
++			pages_scanned_base++;
++		}
 +
-+ 		pages_scanned_stored += delta;
++		pages_scanned_stored += delta;
 +
-+ 		uksm_pages_scanned = uksm_pages_scanned_last = 0;
-+ 	}
++		uksm_pages_scanned = uksm_pages_scanned_last = 0;
++	}
 +
-+ 	uksm_pages_scanned++；
-+ }
++	uksm_pages_scanned++;
++}
 +
-+静态内联 int find_zero_page_hash(int强度，u32 hash)
-+ {
-+ 	return (zero_hash_table[strength] == hash);
-+ }
++static inline int find_zero_page_hash(int strength, u32 hash)
++{
++	return (zero_hash_table[strength] == hash);
++}
 +
-+静态
-+ int cmp_and_merge_zero_page(struct vm_area_struct *vma, struct page *page)
-+ {
-+ 	struct page *zero_page = empty_uksm_zero_page;
-+ 	struct mm_struct *mm = vma->vm_mm;
-+ 	pte_t orig_pte = __pte(0);
-+ 内部	错误 = -EFAULT;
++static
++int cmp_and_merge_zero_page(struct vm_area_struct *vma, struct page *page)
++{
++	struct page *zero_page = empty_uksm_zero_page;
++	struct mm_struct *mm = vma->vm_mm;
++	pte_t orig_pte = __pte(0);
++	int err = -EFAULT;
 +
-+ 	if (uksm_test_exit(mm))
-+		出去；
++	if (uksm_test_exit(mm))
++		goto out;
 +
-+ 	if (!trylock_page(page))
-+		出去；
++	if (!trylock_page(page))
++		goto out;
 +
-+ 	if (!PageAnon(page))
-+		转到 out_unlock；
++	if (!PageAnon(page))
++		goto out_unlock;
 +
-+ 	if (PageTransCompound(page)) {
-+		错误 = split_huge_page(page);
-+		如果（错误）
-+			转到 out_unlock；
-+ 	}
++	if (PageTransCompound(page)) {
++		err = split_huge_page(page);
++		if (err)
++			goto out_unlock;
++	}
 +
-+ 	if (write_protect_page(vma, page, &orig_pte, 0) == 0) {
-+ 		if (is_page_full_zero(page))
-+ 			err = replace_page(vma, page, zero_page, orig_pte);
-+ 	}
++	if (write_protect_page(vma, page, &orig_pte, 0) == 0) {
++		if (is_page_full_zero(page))
++			err = replace_page(vma, page, zero_page, orig_pte);
++	}
 +
-+ out_unlock：
-+	解锁页面（页面）；
-+出：
-+	返回错误；
-+ }
++out_unlock:
++	unlock_page(page);
++out:
++	return err;
++}
 +
-+ /*
-+ * cmp_and_merge_page() - 先看看页面是否可以合并到stable
-+ * 树；如果不是，则将哈希与前一个进行比较，如果相同，则查看页面是否
-+ * 可以插入到不稳定的树中，或者与已经存在的页面合并
-+ * 并且都转移到稳定树中。
++/*
++ * cmp_and_merge_page() - first see if page can be merged into the stable
++ * tree; if not, compare hash to previous and if it's the same, see if page
++ * can be inserted into the unstable tree, or merged with a page already there
++ * and both transferred to the stable tree.
 + *
-+ * @page：我们正在搜索相同页面的页面。
-+ * @rmap_item：反向映射到本页的虚拟地址
++ * @page: the page that we are searching identical page to.
++ * @rmap_item: the reverse mapping into the virtual address of this page
 + */
-+静态无效 cmp_and_merge_page(struct rmap_item *rmap_item, u32 hash)
-+ {
-+ 	struct rmap_item *tree_rmap_item;
-+ 	struct page *page;
-+	结构页 *kpage = NULL;
-+ 	u32 hash_max;
-+	错误；
-+ 	unsigned int success1, success2;
-+ 	struct stable_node *snode;
-+ 	int cmp;
-+ 	struct rb_node *parent = NULL, **new;
++static void cmp_and_merge_page(struct rmap_item *rmap_item, u32 hash)
++{
++	struct rmap_item *tree_rmap_item;
++	struct page *page;
++	struct page *kpage = NULL;
++	u32 hash_max;
++	int err;
++	unsigned int success1, success2;
++	struct stable_node *snode;
++	int cmp;
++	struct rb_node *parent = NULL, **new;
 +
-+ 	remove_rmap_item_from_tree(rmap_item);
-+	页面 = rmap_item->页面；
++	remove_rmap_item_from_tree(rmap_item);
++	page = rmap_item->page;
 +
-+ 	/* 我们首先从在稳定树中搜索页面开始 */
-+ 	kpage = stable_tree_search(rmap_item, hash);
-+ 	if (kpage) {
-+		错误 = try_to_merge_with_uksm_page(rmap_item, kpage,
-+						 哈希）；
++	/* We first start with searching the page inside the stable tree */
++	kpage = stable_tree_search(rmap_item, hash);
++	if (kpage) {
++		err = try_to_merge_with_uksm_page(rmap_item, kpage,
++						 hash);
 +		if (!err) {
 +			/*
 +			 * The page was successfully merged, add
@@ -4203,77 +4203,77 @@ diff --git a/mm/memory.cb/mm/memory.c
 +
 +		/*
 +		 * if it's a collision and it has been search in sub-rbtree
-+ 		 * (hash_max != 0)，我们要中止，因为如果是
-+ 		 * 成功合并到不稳定树中，碰撞趋势为
-+ 		 * 再次发生。
-+ 		 */
-+ 		if (err == MERGE_ERR_COLLI && rmap_item->hash_max)
-+			返回；
-+ 	}
++		 * (hash_max != 0), we want to abort, because if it is
++		 * successfully merged in unstable tree, the collision trends to
++		 * happen again.
++		 */
++		if (err == MERGE_ERR_COLLI && rmap_item->hash_max)
++			return;
++	}
 +
-+ 	tree_rmap_item =
-+		不稳定树搜索插入（rmap_item，哈希）；
-+	如果（tree_rmap_item）{
-+ 		err = try_to_merge_two_pages(rmap_item, tree_rmap_item, hash);
-+ 		/*
-+ 		 * 一旦我们合并了这个页面，我们就想删除
-+ 		 * 我们从不稳定的页面合并的 rmap_item
-+ 		 * 树，并将其作为新节点插入到稳定树中。
-+ 		 */
-+		如果（！错误）{
-+ 			kpage = 页；
-+ 			remove_rmap_item_from_tree(tree_rmap_item);
-+ 			lock_page(kpage);
-+ 			snode = stable_tree_insert(&kpage, hash,
-+ 						   rmap_item、tree_rmap_item、
-+ 						   &success1, &success2);
++	tree_rmap_item =
++		unstable_tree_search_insert(rmap_item, hash);
++	if (tree_rmap_item) {
++		err = try_to_merge_two_pages(rmap_item, tree_rmap_item, hash);
++		/*
++		 * As soon as we merge this page, we want to remove the
++		 * rmap_item of the page we have merged with from the unstable
++		 * tree, and insert it instead as new node in the stable tree.
++		 */
++		if (!err) {
++			kpage = page;
++			remove_rmap_item_from_tree(tree_rmap_item);
++			lock_page(kpage);
++			snode = stable_tree_insert(&kpage, hash,
++						   rmap_item, tree_rmap_item,
++						   &success1, &success2);
 +
-+ 			/*
-+ 			 * 不记录树项的重复数据删除，不计入
-+ 			 * 本轮扫描。
-+ 			 */
-+			如果（成功 2）
-+ 				stable_tree_append(tree_rmap_item, snode, 0);
++			/*
++			 * Do not log dedup for tree item, it's not counted as
++			 * scanned in this round.
++			 */
++			if (success2)
++				stable_tree_append(tree_rmap_item, snode, 0);
 +
-+ 			/*
-+ 			 * 这两个 stable append 的顺序很重要：
-+ 			 * 我们正在扫描 rmap_item。
-+ 			 */
-+			如果（成功 1）
-+ 				stable_tree_append(rmap_item, snode, 1);
++			/*
++			 * The order of these two stable append is important:
++			 * we are scanning rmap_item.
++			 */
++			if (success1)
++				stable_tree_append(rmap_item, snode, 1);
 +
-+ 			/*
-+ 			 * 原来的kpage 里面可以解锁
-+ 			 * stable_tree_insert() 已经。这一页
-+ 			 * 应该在做之前解锁
-+ 			 * break_cow()。
-+ 			 */
-+ 			unlock_page(kpage);
++			/*
++			 * The original kpage may be unlocked inside
++			 * stable_tree_insert() already. This page
++			 * should be unlocked before doing
++			 * break_cow().
++			 */
++			unlock_page(kpage);
 +
-+			如果 (!success1)
-+ 				break_cow(rmap_item);
++			if (!success1)
++				break_cow(rmap_item);
 +
-+			如果 (!success2)
-+ 				break_cow(tree_rmap_item);
++			if (!success2)
++				break_cow(tree_rmap_item);
 +
-+ 		} else if (err == MERGE_ERR_COLLI) {
-+ 			BUG_ON(tree_rmap_item->tree_node->count > 1);
++		} else if (err == MERGE_ERR_COLLI) {
++			BUG_ON(tree_rmap_item->tree_node->count > 1);
 +
-+ 			rmap_item_hash_max(tree_rmap_item,
-+ 					   tree_rmap_item->tree_node->hash);
++			rmap_item_hash_max(tree_rmap_item,
++					   tree_rmap_item->tree_node->hash);
 +
-+ 			hash_max = rmap_item_hash_max(rmap_item, hash);
-+ 			cmp = hash_cmp(hash_max, tree_rmap_item->hash_max);
-+ 			parent = &tree_rmap_item->node;
-+			如果 (cmp < 0)
-+				新 = &parent->rb_left;
-+			否则如果 (cmp > 0)
-+				新 = &parent->rb_right;
-+			其他
-+				转到 put_up_out；
++			hash_max = rmap_item_hash_max(rmap_item, hash);
++			cmp = hash_cmp(hash_max, tree_rmap_item->hash_max);
++			parent = &tree_rmap_item->node;
++			if (cmp < 0)
++				new = &parent->rb_left;
++			else if (cmp > 0)
++				new = &parent->rb_right;
++			else
++				goto put_up_out;
 +
-+ 			rmap_item->tree_node = tree_rmap_item->tree_node;
-+ 			rmap_item->地址 |= UNSTABLE_FLAG;
++			rmap_item->tree_node = tree_rmap_item->tree_node;
++			rmap_item->address |= UNSTABLE_FLAG;
 +			rmap_item->hash_round = uksm_hash_round;
 +			rb_link_node(&rmap_item->node, parent, new);
 +			rb_insert_color(&rmap_item->node,
@@ -6939,4 +6939,4 @@ index a8222041bd44..7058e8322cbd 100644
 +#endif
  	/* enum writeback_stat_item counters */
  	"nr_dirty_threshold",
-        "nr_dirty_background_threshold",
+ 	"nr_dirty_background_threshold",
