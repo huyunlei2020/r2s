@@ -133,6 +133,7 @@ jobs:
         rm -rf ./artifact/
         mkdir -p ./artifact/
         mv openwrt/bin/targets/rockchip/armv8/*sysupgrade.img* ./artifact/
+        echo "strDate=$(TZ=UTC-8 date +%Y-%m-%d)" >> $GITHUB_ENV
         cd ./artifact/
         ls -Ahl
         gzip -d *.gz && exit 0
@@ -142,7 +143,7 @@ jobs:
         zip R2C-$(date +%Y-%m-%d)-21.02-ext4.zip *r2c*ext4*
         zip R2C-$(date +%Y-%m-%d)-21.02-sfs.zip *r2c*squashfs*
         ls -Ahl
-        
+    
     - name: Upload artifact
       uses: actions/upload-artifact@main
       with:
