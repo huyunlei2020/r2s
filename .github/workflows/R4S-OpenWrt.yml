@@ -52,7 +52,7 @@ jobs:
     - name: Prepare Mixedwrt
       run: |
         sudo chown -R runner:runner /home/runner/work/Nanopi
-        cp -r ./SCRIPTS/R2S/. ./SCRIPTS/
+        cp -r ./SCRIPTS/R4S/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
 
@@ -80,7 +80,7 @@ jobs:
     - name: Make Config
       run: |
         cd openwrt
-        mv ../SEED/R2C/config.seed .config
+        mv ../SEED/R4S/config.seed .config
         #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
