@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-      
+
     - name: Show system
       run: |
         echo -e "Total CPU cores\t: $(nproc)"
@@ -23,7 +23,7 @@ jobs:
         [ -f /etc/issue.net ] && cat /etc/issue.net
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
-        
+
     - name: Free disk space
       run: |
         sudo -E swapoff -a
@@ -36,7 +36,7 @@ jobs:
         sudo -E rm -rf /usr/share/dotnet /usr/local/lib/android/sdk /etc/mysql /etc/php /usr/local/share/boost
         [ -n "$AGENT_TOOLSDIRECTORY" ] && sudo rm -rf "$AGENT_TOOLSDIRECTORY"
         df -h
-        
+
     - name: Init build dependencies
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -48,37 +48,42 @@ jobs:
         sudo -E apt-get clean -y
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
         df -h
-        
+
     - name: Prepare Mixedwrt
       run: |
         sudo chown -R runner:runner /home/runner/work/Nanopi
-        cp -r ./SCRIPTS/R4S/. ./SCRIPTS/
+        cp -r ./SCRIPTS/R2S/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
-        
+
     - name: Prepare Package
       run: |
         cd openwrt
+        rm -rf target/linux/rockchip
+        svn co https://github.com/immortalwrt/immortalwrt/branches/master/target/linux/rockchip target/linux/rockchip
+        rm -rf package/boot
+        svn co https://github.com/immortalwrt/immortalwrt/branches/master/package/boot package/boot
         cp -r ../SCRIPTS/. ./
         /bin/bash 02_prepare_package.sh
         /bin/bash 02_target_only.sh
-        
+
     - name: Convert Translation
       run: |
         cd openwrt
         /bin/bash 03_convert_translation.sh
-        
+
     - name: Add ACL
       run: |
         cd openwrt
         /bin/bash 05_create_acl_for_luci.sh -a
-        
+
     - name: Make Config
       run: |
         cd openwrt
-        mv ../SEED/R4S/config.seed .config
+        mv ../SEED/R2C/config.seed .config
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
-        
+
     - name: Smart chmod
       run: |
         MY_Filter=$(mktemp)
@@ -88,37 +93,35 @@ jobs:
         find ./ -type f | grep -v -f ${MY_Filter} | xargs -s1024 file | grep 'executable\|ELF' | cut -d ':' -f1 | xargs -s1024 chmod 755
         rm -f ${MY_Filter}
         unset MY_Filter
-        
+
+    - name: Cache
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: 'true'
+        prefix: ${{ github.workspace }}/openwrt
+
     - name: Make Download
       run: |
         df -h
         cd openwrt
         make download -j50
-        
-    - name: Make Toolchain
-      run: |
-        df -h
-        cd openwrt
-        let make_process=$(nproc)+2
-        make toolchain/install -j${make_process} V=s
-        
+
     - name: Compile Openwrt
       id: compileopenwrt
       continue-on-error: true
       run: |
         df -h
         cd openwrt
-        let Make_Process=$(nproc)+2
-        make -j${Make_Process} V=w
+        make -j$(($(nproc) + 1)) || make -j$(($(nproc) + 1)) V=s
         echo $?
-        
+
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
       run: |
         cat openwrt/.config
         echo '================================================================'
         cd openwrt && make -j1 V=s
-        
+
     - name: Print Disk Space After
       run: df -h
       
@@ -153,4 +156,4 @@ jobs:
         tag: ${{env.strDate}}
         file_glob: true
         overwrite: true
-        release_name: ${{env.strDate}}-openwrt-21.02更新
+        release_name: ${{env.strDate}}-openwrt-21.02-0
