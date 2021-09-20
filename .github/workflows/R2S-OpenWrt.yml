@@ -51,7 +51,7 @@ jobs:
 
     - name: Prepare Mixedwrt
       run: |
-        sudo chown -R runner:runner /home/runner/work/YAOF
+        sudo chown -R runner:runner /home/runner/work/Nanopi
         cp -r ./SCRIPTS/R2S/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
@@ -152,4 +152,4 @@ jobs:
         tag: ${{env.strDate}}
         file_glob: true
         overwrite: true
-        release_name: ${{env.strDate}}-openwrt-21.02更新
+        release_name: ${{env.strDate}}-openwrt-21.02-0
