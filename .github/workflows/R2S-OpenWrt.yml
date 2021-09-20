@@ -51,7 +51,7 @@ jobs:
 
     - name: Prepare Mixedwrt
       run: |
-        sudo chown -R runner:runner /home/runner/work/Nanopi
+        sudo chown -R runner:runner /home/runner/work/YAOF
         cp -r ./SCRIPTS/R2S/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
@@ -77,6 +77,7 @@ jobs:
       run: |
         cd openwrt
         mv ../SEED/R2S/config.seed .config
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
 
     - name: Smart chmod
@@ -89,18 +90,17 @@ jobs:
         rm -f ${MY_Filter}
         unset MY_Filter
 
+    - name: Cache
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: 'true'
+        prefix: ${{ github.workspace }}/openwrt
+
     - name: Make Download
       run: |
         df -h
         cd openwrt
         make download -j50
-
-    - name: Make Toolchain
-      run: |
-        df -h
-        cd openwrt
-        let make_process=$(nproc)+2
-        make toolchain/install -j${make_process} V=s
 
     - name: Compile Openwrt
       id: compileopenwrt
@@ -108,8 +108,7 @@ jobs:
       run: |
         df -h
         cd openwrt
-        let Make_Process=$(nproc)+2
-        make -j${Make_Process} V=w
+        make -j$(($(nproc) + 1)) || make -j$(($(nproc) + 1)) V=s
         echo $?
 
     - name: If Error
